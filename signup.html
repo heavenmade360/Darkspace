@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FocusFlow – Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0e0e0e;
+      --paper: #f5f0e8;
+      --paper-dark: #ede8de;
+      --accent: #e8440a;
+      --accent-light: rgba(232, 68, 10, 0.1);
+      --green: #2a9e5e;
+      --green-light: rgba(42, 158, 94, 0.1);
+      --muted: #8a8070;
+      --rule: rgba(14,14,14,0.1);
+      --rule-strong: rgba(14,14,14,0.18);
+      --sidebar-w: 260px;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 16px; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ═══════════════════════════════════════════
+       CURSOR
+    ═══════════════════════════════════════════ */
+    .cursor {
+      position: fixed; width: 10px; height: 10px;
+      background: var(--accent); border-radius: 50%;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+      transition: width 0.15s, height 0.15s;
+      mix-blend-mode: multiply;
+    }
+    .cursor.grow { width: 36px; height: 36px; }
+    @media (hover: none) { .cursor { display: none; } body { cursor: auto; } }
+    body { cursor: none; }
+
+    /* ═══════════════════════════════════════════
+       PAGE VIEWS — toggled by JS
+    ═══════════════════════════════════════════ */
+    .view { display: none; }
+    .view.active { display: flex; }
+
+    /* ═══════════════════════════════════════════
+       ▌ AUTH PAGE  (sign-in / sign-up)
+    ═══════════════════════════════════════════ */
+    #auth-view {
+      min-height: 100vh;
+      flex-direction: row;
+    }
+
+    /* Left panel */
+    .auth-left {
+      width: 46%;
+      background: var(--ink);
+      color: var(--paper);
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Grid texture */
+    .auth-left::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(245,240,232,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,240,232,0.04) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+
+    /* Glow */
+    .auth-left::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; left: -80px;
+      width: 380px; height: 380px;
+      background: radial-gradient(circle, rgba(232,68,10,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .auth-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      position: relative; z-index: 2;
+    }
+
+    .auth-hero-text {
+      position: relative; z-index: 2;
+    }
+    .auth-hero-text h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.8rem, 4vw, 4.2rem);
+      letter-spacing: -2px;
+      line-height: 0.95;
+      margin-bottom: 20px;
+    }
+    .auth-hero-text h1 em { color: var(--accent); font-style: italic; }
+    .auth-hero-text p {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      color: rgba(245,240,232,0.5);
+      line-height: 1.7;
+      max-width: 300px;
+    }
+
+    .auth-stats {
+      display: flex; gap: 40px;
+      position: relative; z-index: 2;
+      padding-top: 32px;
+      border-top: 1px solid rgba(245,240,232,0.1);
+    }
+    .auth-stat h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem; letter-spacing: -1px;
+    }
+    .auth-stat p {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: rgba(245,240,232,0.4);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Right panel — form */
+    .auth-right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 48px;
+    }
+
+    .auth-form-box {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .form-toggle {
+      display: flex;
+      border: 1px solid var(--rule-strong);
+      border-radius: 0;
+      margin-bottom: 40px;
+      overflow: hidden;
+    }
+    .form-toggle button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: transparent;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      cursor: none;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .form-toggle button.active {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .form-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      letter-spacing: -0.8px;
+      margin-bottom: 8px;
+    }
+    .form-subtitle {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 36px;
+      letter-spacing: 0.02em;
+    }
+
+    .field {
+      margin-bottom: 20px;
+    }
+    .field label {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .field input {
+      width: 100%;
+      border: 1px solid var(--rule-strong);
+      background: transparent;
+      padding: 14px 16px;
+      font-family: 'DM Mono', monospace;
+      font-size: 14px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field input:focus {
+      border-color: var(--ink);
+      box-shadow: 3px 3px 0 var(--ink);
+    }
+    .field input::placeholder { color: rgba(14,14,14,0.3); }
+
+    .field-row { display: flex; gap: 14px; }
+    .field-row .field { flex: 1; }
+
+    .forgot {
+      display: block;
+      text-align: right;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      margin-top: -12px;
+      margin-bottom: 24px;
+      transition: color 0.2s;
+    }
+    .forgot:hover { color: var(--ink); }
+
+    .btn-primary {
+      display: block; width: 100%;
+      padding: 16px;
+      background: var(--ink); color: var(--paper);
+      border: none; cursor: none;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      transition: background 0.2s;
+      margin-bottom: 24px;
+    }
+    .btn-primary:hover { background: var(--accent); }
+
+    .divider {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 24px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--rule);
+    }
+    .divider span {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    .btn-social {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      border: 1px solid var(--rule-strong);
+      cursor: none;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px; font-weight: 600;
+      color: var(--ink);
+      transition: all 0.2s;
+      margin-bottom: 12px;
+    }
+    .btn-social:hover { border-color: var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+
+    .auth-footer-note {
+      text-align: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; color: var(--muted);
+      margin-top: 28px;
+    }
+    .auth-footer-note a { color: var(--ink); cursor: none; }
+
+    /* Error / success states */
+    .field-error {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; color: var(--accent);
+      margin-top: 6px; display: none;
+    }
+    .field.error input { border-color: var(--accent); }
+    .field.error .field-error { display: block; }
+
+    /* ═══════════════════════════════════════════
+       ▌ DASHBOARD
+    ═══════════════════════════════════════════ */
+    #dashboard-view {
+      min-height: 100vh;
+      flex-direction: row;
+      animation: fadeIn 0.4s ease both;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* — Sidebar — */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--ink);
+      color: var(--paper);
+      display: flex;
+      flex-direction: column;
+      padding: 32px 0;
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      z-index: 50;
+    }
+
+    .sidebar-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      padding: 0 28px 32px;
+      border-bottom: 1px solid rgba(245,240,232,0.08);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(245,240,232,0.3);
+      padding: 0 12px;
+      margin-bottom: 8px;
+      margin-top: 16px;
+    }
+    .nav-label:first-child { margin-top: 0; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 12px;
+      border-radius: 0;
+      color: rgba(245,240,232,0.55);
+      font-size: 14px; font-weight: 600;
+      cursor: none;
+      transition: all 0.15s;
+      border: 1px solid transparent;
+      text-decoration: none;
+      position: relative;
+    }
+    .nav-item svg { width: 17px; height: 17px; stroke: currentColor; fill: none; flex-shrink: 0; }
+    .nav-item:hover { color: var(--paper); background: rgba(245,240,232,0.06); }
+    .nav-item.active {
+      color: var(--paper);
+      background: rgba(245,240,232,0.09);
+      border-color: rgba(245,240,232,0.12);
+    }
+    .nav-item.active::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--accent);
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; font-weight: 500;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+
+    .sidebar-user {
+      padding: 20px 20px;
+      border-top: 1px solid rgba(245,240,232,0.08);
+      display: flex; align-items: center; gap: 12px;
+      cursor: none;
+    }
+    .user-avatar {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      font-size: 15px; color: #fff;
+      flex-shrink: 0;
+    }
+    .user-info { flex: 1; min-width: 0; }
+    .user-info strong {
+      display: block;
+      font-size: 13px; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .user-info span {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: rgba(245,240,232,0.4);
+    }
+    .logout-btn {
+      background: none; border: none;
+      color: rgba(245,240,232,0.35);
+      cursor: none;
+      transition: color 0.2s;
+      padding: 4px;
+    }
+    .logout-btn:hover { color: var(--accent); }
+    .logout-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; }
+
+    /* — Main content — */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top bar */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 40px;
+      border-bottom: 1px solid var(--rule);
+      position: sticky; top: 0;
+      background: var(--paper);
+      z-index: 30;
+    }
+
+    .topbar-left h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      letter-spacing: -0.5px;
+    }
+    .topbar-left p {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+
+    .topbar-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 18px;
+      background: var(--ink); color: var(--paper);
+      border: none; cursor: none;
+      font-family: 'Syne', sans-serif;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      transition: background 0.2s;
+    }
+    .topbar-btn:hover { background: var(--accent); }
+    .topbar-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
+    /* Content area */
+    .content { padding: 36px 40px; flex: 1; }
+
+    /* Greeting */
+    .greeting {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: 36px;
+    }
+    .greeting-text h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.5rem;
+      letter-spacing: -1.5px;
+      line-height: 1;
+    }
+    .greeting-text h1 em { color: var(--accent); font-style: italic; }
+    .greeting-text p {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px; color: var(--muted);
+      margin-top: 8px;
+    }
+    .date-chip {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px; color: var(--muted);
+      border: 1px solid var(--rule-strong);
+      padding: 8px 16px;
+    }
+
+    /* Stat cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--paper);
+      padding: 28px;
+      transition: background 0.2s;
+    }
+    .stat-card:hover { background: var(--paper-dark); }
+    .stat-card-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .stat-card-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.4rem;
+      letter-spacing: -1.5px;
+      line-height: 1;
+    }
+    .stat-card-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      margin-top: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .stat-up { color: var(--green); }
+    .stat-down { color: var(--accent); }
+
+    /* Main grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+    }
+
+    /* Timer card */
+    .timer-card {
+      border: 1px solid var(--rule-strong);
+      background: var(--ink);
+      color: var(--paper);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .timer-card-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(245,240,232,0.4);
+      margin-bottom: 8px;
+    }
+
+    .session-tabs {
+      display: flex; gap: 0; margin-bottom: 36px;
+      border: 1px solid rgba(245,240,232,0.12);
+    }
+    .session-tab {
+      padding: 9px 20px;
+      font-family: 'Syne', sans-serif;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 0.05em; text-transform: uppercase;
+      cursor: none;
+      color: rgba(245,240,232,0.4);
+      background: transparent;
+      border: none;
+      transition: all 0.2s;
+    }
+    .session-tab.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* Timer ring */
+    .timer-ring-wrap { position: relative; width: 200px; height: 200px; margin-bottom: 32px; }
+    .timer-ring-wrap svg {
+      transform: rotate(-90deg);
+      position: absolute; inset: 0;
+    }
+    .ring-bg-d { stroke: rgba(245,240,232,0.06); }
+    .ring-prog-d {
+      stroke: var(--accent);
+      stroke-dasharray: 565;
+      stroke-dashoffset: 130;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1);
+    }
+    .timer-inner {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .timer-time {
+      font-family: 'DM Serif Display', serif;
+      font-size: 3.2rem;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+    .timer-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(245,240,232,0.4);
+      margin-top: 6px;
+    }
+
+    .timer-controls {
+      display: flex; gap: 12px; margin-bottom: 32px;
+    }
+    .ctrl-btn {
+      width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(245,240,232,0.15);
+      background: transparent;
+      color: var(--paper);
+      cursor: none;
+      transition: all 0.2s;
+    }
+    .ctrl-btn:hover { border-color: rgba(245,240,232,0.4); }
+    .ctrl-btn.primary {
+      width: 56px; height: 56px;
+      background: var(--accent); border-color: var(--accent);
+    }
+    .ctrl-btn.primary:hover { background: #c23509; border-color: #c23509; }
+    .ctrl-btn svg { width: 18px; height: 18px; fill: currentColor; }
+    .ctrl-btn.primary svg { width: 20px; height: 20px; }
+
+    .session-info {
+      display: flex; gap: 32px;
+      padding-top: 28px;
+      border-top: 1px solid rgba(245,240,232,0.08);
+      width: 100%;
+    }
+    .s-info-item { text-align: center; }
+    .s-info-item span {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(245,240,232,0.35);
+      margin-bottom: 4px;
+    }
+    .s-info-item strong {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      letter-spacing: -0.5px;
+    }
+
+    /* Right column */
+    .right-col { display: flex; flex-direction: column; gap: 20px; }
+
+    .panel {
+      border: 1px solid var(--rule-strong);
+      padding: 24px;
+    }
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .panel-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.15rem;
+      letter-spacing: -0.3px;
+    }
+    .panel-action {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; color: var(--muted);
+      text-decoration: none; cursor: none;
+      transition: color 0.2s;
+    }
+    .panel-action:hover { color: var(--accent); }
+
+    /* Task list */
+    .task-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .task-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .task-check {
+      width: 18px; height: 18px; flex-shrink: 0;
+      border: 1.5px solid var(--rule-strong);
+      cursor: none;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .task-check.done {
+      background: var(--green);
+      border-color: var(--green);
+    }
+    .task-check.done::after {
+      content: '';
+      width: 10px; height: 6px;
+      border-left: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(-45deg) translate(1px, -1px);
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 13px; font-weight: 600;
+    }
+    .task-text.done-text {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+    .task-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      padding: 3px 8px;
+      background: var(--paper-dark);
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+    }
+
+    .add-task {
+      display: flex; gap: 0; margin-top: 16px;
+    }
+    .add-task input {
+      flex: 1;
+      border: 1px solid var(--rule-strong);
+      border-right: none;
+      background: transparent;
+      padding: 10px 14px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px; color: var(--ink);
+      outline: none;
+    }
+    .add-task input:focus { border-color: var(--ink); }
+    .add-task button {
+      padding: 10px 16px;
+      background: var(--ink); color: var(--paper);
+      border: 1px solid var(--ink);
+      cursor: none;
+      font-family: 'DM Mono', monospace;
+      font-size: 18px; line-height: 1;
+      transition: background 0.2s;
+    }
+    .add-task button:hover { background: var(--accent); border-color: var(--accent); }
+
+    /* Heatmap / activity bar */
+    .heatmap { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .heatmap-cell {
+      aspect-ratio: 1;
+      background: var(--paper-dark);
+      transition: background 0.2s;
+    }
+    .heatmap-cell:hover { background: var(--accent) !important; }
+    .h0 { background: var(--paper-dark); }
+    .h1 { background: rgba(232,68,10,0.2); }
+    .h2 { background: rgba(232,68,10,0.45); }
+    .h3 { background: rgba(232,68,10,0.7); }
+    .h4 { background: var(--accent); }
+
+    /* Progress bar */
+    .progress-row {
+      margin-bottom: 14px;
+    }
+    .progress-meta {
+      display: flex; justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .progress-meta span:first-child {
+      font-size: 13px; font-weight: 600;
+    }
+    .progress-meta span:last-child {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; color: var(--muted);
+    }
+    .progress-bar {
+      height: 6px; background: var(--paper-dark);
+      position: relative;
+    }
+    .progress-fill {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      background: var(--ink);
+      transition: width 1s cubic-bezier(0.4,0,0.2,1);
+    }
+    .progress-fill.accent { background: var(--accent); }
+    .progress-fill.green { background: var(--green); }
+
+    /* Bottom section */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    /* ─── MOBILE SIDEBAR ─── */
+    .mobile-topbar {
+      display: none;
+      align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--rule);
+      position: sticky; top: 0;
+      background: var(--paper); z-index: 100;
+    }
+    .menu-toggle {
+      background: none; border: none; cursor: none;
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .menu-toggle span { width: 22px; height: 2px; background: var(--ink); display: block; }
+
+    @media (max-width: 1100px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .main-grid { grid-template-columns: 1fr; }
+      .right-col { flex-direction: row; flex-wrap: wrap; }
+      .right-col .panel { flex: 1; min-width: 260px; }
+    }
+
+    @media (max-width: 768px) {
+      #auth-view { flex-direction: column; }
+      .auth-left { width: 100%; min-height: 220px; }
+      .auth-right { padding: 36px 24px; }
+
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+      }
+      .sidebar.open { transform: translateX(0); }
+
+      .mobile-topbar { display: flex; }
+      .topbar { display: none; }
+
+      .main { margin-left: 0; }
+      .content { padding: 20px; }
+      .greeting { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .bottom-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 32px; right: 32px;
+      background: var(--ink); color: var(--paper);
+      padding: 14px 24px;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      z-index: 9998;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      display: flex; align-items: center; gap: 10px;
+      border-left: 3px solid var(--accent);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+  </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="toast" id="toast">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toast-msg">Action complete</span>
+</div>
+
+<!-- ══════════════════════════════════════════
+     AUTH VIEW
+══════════════════════════════════════════ -->
+<div class="view active" id="auth-view">
+
+  <!-- Left panel -->
+  <div class="auth-left">
+    <div class="auth-logo">FocusFlow</div>
+
+    <div class="auth-hero-text">
+      <h1>Your most<br>productive<br><em>days</em><br>await.</h1>
+      <p>Join other focused students who get more done — without burning out.</p>
+    </div>
+
+    <div class="auth-stats">
+      <div class="auth-stat">
+        <h3>88%</h3>
+        <p>Focus rate</p>
+      </div>
+      <div class="auth-stat">
+        <h3>4.9★</h3>
+        <p>Satisfaction</p>
+      </div>
+      <div class="auth-stat">
+        <h3>Free</h3>
+        <p>To start</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right panel -->
+  <div class="auth-right">
+    <div class="auth-form-box">
+
+      <!-- Toggle -->
+      <div class="form-toggle">
+        <button class="active" id="signin-tab" onclick="switchTab('signin')">Sign In</button>
+        <button id="signup-tab" onclick="switchTab('signup')">Create Account</button>
+      </div>
+
+      <!-- Sign In form -->
+      <div id="signin-form">
+        <div class="form-title">Welcome back.</div>
+        <div class="form-subtitle">Enter your credentials to continue.</div>
+
+        <div class="field" id="field-email-in">
+          <label>Email address</label>
+          <input type="email" id="email-in" placeholder="you@example.com" autocomplete="email">
+          <div class="field-error">Please enter a valid email.</div>
+        </div>
+
+        <div class="field" id="field-pass-in">
+          <label>Password</label>
+          <input type="password" id="pass-in" placeholder="••••••••" autocomplete="current-password">
+          <div class="field-error">Password is required.</div>
+        </div>
+
+        <a href="#" class="forgot">Forgot password?</a>
+
+        <button class="btn-primary" onclick="handleSignIn()">Sign In →</button>
+
+        <div class="divider"><span>or continue with</span></div>
+
+        <button class="btn-social" onclick="showToast('Google sign-in coming soon!')">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+
+      </div>
+
+      <!-- Sign Up form -->
+      <div id="signup-form" style="display:none">
+        <div class="form-title">Start for free.</div>
+        <div class="form-subtitle">No credit card needed. Set up in 30 seconds.</div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>First name</label>
+            <input type="text" id="fname" placeholder="Alex" autocomplete="given-name">
+          </div>
+          <div class="field">
+            <label>Last name</label>
+            <input type="text" id="lname" placeholder="Chen" autocomplete="family-name">
+          </div>
+        </div>
+
+        <div class="field" id="field-email-up">
+          <label>Work email</label>
+          <input type="email" id="email-up" placeholder="you@example.com" autocomplete="email">
+          <div class="field-error">Please enter a valid email.</div>
+        </div>
+
+        <div class="field" id="field-pass-up">
+          <label>Password</label>
+          <input type="password" id="pass-up" placeholder="Min. 8 characters" autocomplete="new-password">
+          <div class="field-error">Password must be at least 8 characters.</div>
+        </div>
+
+        <button class="btn-primary" style="margin-top:8px" onclick="handleSignUp()">Create Account →</button>
+
+        <div class="divider"><span>or continue with</span></div>
+
+        <button class="btn-social" onclick="showToast('Google sign-up coming soon!')">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+
+      <div class="auth-footer-note">
+        By continuing you agree to our <a href="#">Terms</a> & <a href="#">Privacy Policy</a>.
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     DASHBOARD VIEW
+══════════════════════════════════════════ -->
+<div class="view" id="dashboard-view">
+
+  <!-- Mobile top bar -->
+  <div class="mobile-topbar">
+    <div style="font-family:'DM Serif Display',serif;font-size:18px;">FocusFlow</div>
+    <button class="menu-toggle" onclick="toggleSidebar()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">FocusFlow</div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-label">Overview</div>
+      <a class="nav-item active" href="#" onclick="return false">
+        <svg viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="#" onclick="showToast('Sessions view coming soon!');return false">
+        <svg viewBox="0 0 24 24" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Sessions
+        <span class="nav-badge">3</span>
+      </a>
+      <a class="nav-item" href="#" onclick="showToast('Tasks view coming soon!');return false">
+        <svg viewBox="0 0 24 24" stroke-width="1.8"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Tasks
+      </a>
+
+      <div class="nav-label">Insights</div>
+      <a class="nav-item" href="#" onclick="showToast('Analytics coming soon!');return false">
+        <svg viewBox="0 0 24 24" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Analytics
+      </a>
+      <a class="nav-item" href="#" onclick="showToast('Calendar view coming soon!');return false">
+        <svg viewBox="0 0 24 24" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Calendar
+      </a>
+
+      <div class="nav-label">Account</div>
+      <a class="nav-item" href="#" onclick="showToast('Settings coming soon!');return false">
+        <svg viewBox="0 0 24 24" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="user-avatar" id="dash-avatar">A</div>
+      <div class="user-info">
+        <strong id="dash-name">Alex Chen</strong>
+        <span>Free Plan</span>
+      </div>
+      <button class="logout-btn" onclick="handleLogout()" title="Sign out">
+        <svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h2>Dashboard</h2>
+        <p id="top-date">Saturday, Feb 21 · 2026</p>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-btn" onclick="startTimer()">
+          <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>
+          New Session
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Greeting -->
+      <div class="greeting">
+        <div class="greeting-text">
+          <h1>Good morning, <em id="greet-name">Alex.</em></h1>
+          <p>You have 4 tasks left today. Keep going — you're on a 5-day streak 🔥</p>
+        </div>
+        <div class="date-chip" id="date-chip">Sat, Feb 21</div>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-label">Today's Focus</div>
+          <div class="stat-card-value" id="focus-time">2h 14m</div>
+          <div class="stat-card-sub stat-up">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+            +24min from yesterday
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Sessions Done</div>
+          <div class="stat-card-value">3</div>
+          <div class="stat-card-sub" style="color:var(--muted)">Goal: 6 today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Focus Streak</div>
+          <div class="stat-card-value">5🔥</div>
+          <div class="stat-card-sub stat-up">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+            Personal best!
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Tasks Completed</div>
+          <div class="stat-card-value">4/8</div>
+          <div class="stat-card-sub" style="color:var(--muted)">50% done today</div>
+        </div>
+      </div>
+
+      <!-- Main grid -->
+      <div class="main-grid">
+
+        <!-- Timer card -->
+        <div class="timer-card">
+          <div class="timer-card-label">Pomodoro Timer</div>
+          <div class="session-tabs">
+            <button class="session-tab active" onclick="setMode(this,'Focus',25,0)">Focus</button>
+            <button class="session-tab" onclick="setMode(this,'Short Break',5,440)">Short Break</button>
+            <button class="session-tab" onclick="setMode(this,'Long Break',15,350)">Long Break</button>
+          </div>
+
+          <div class="timer-ring-wrap">
+            <svg width="200" height="200" viewBox="0 0 200 200">
+              <circle class="ring-bg-d" cx="100" cy="100" r="90" fill="none" stroke-width="6"/>
+              <circle class="ring-prog-d" id="ring" cx="100" cy="100" r="90" fill="none" stroke-width="6"/>
+            </svg>
+            <div class="timer-inner">
+              <div class="timer-time" id="timer-display">25:00</div>
+              <div class="timer-label" id="timer-mode-label">Focus</div>
+            </div>
+          </div>
+
+          <div class="timer-controls">
+            <button class="ctrl-btn" onclick="resetTimer()" title="Reset">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+            </button>
+            <button class="ctrl-btn primary" id="play-btn" onclick="toggleTimer()">
+              <svg id="play-icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+            <button class="ctrl-btn" onclick="skipTimer()" title="Skip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4" fill="currentColor" stroke="none"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+            </button>
+          </div>
+
+          <div class="session-info">
+            <div class="s-info-item">
+              <span>Sessions</span>
+              <strong id="session-count">3</strong>
+            </div>
+            <div class="s-info-item">
+              <span>Until break</span>
+              <strong id="until-break">1</strong>
+            </div>
+            <div class="s-info-item">
+              <span>Today's goal</span>
+              <strong>6</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div class="right-col">
+
+          <!-- Tasks -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">Today's Tasks</div>
+              <a href="#" class="panel-action" onclick="showToast('All tasks view coming soon!');return false">View all →</a>
+            </div>
+
+            <div id="task-list">
+              <div class="task-item">
+                <div class="task-check done" onclick="toggleTask(this)"></div>
+                <span class="task-text done-text">Read research paper</span>
+                <span class="task-tag">Study</span>
+              </div>
+              <div class="task-item">
+                <div class="task-check done" onclick="toggleTask(this)"></div>
+                <span class="task-text done-text">Weekly review notes</span>
+                <span class="task-tag">Work</span>
+              </div>
+              <div class="task-item">
+                <div class="task-check" onclick="toggleTask(this)"></div>
+                <span class="task-text">Draft project proposal</span>
+                <span class="task-tag">Work</span>
+              </div>
+              <div class="task-item">
+                <div class="task-check" onclick="toggleTask(this)"></div>
+                <span class="task-text">Reply to emails</span>
+                <span class="task-tag">Admin</span>
+              </div>
+              <div class="task-item">
+                <div class="task-check" onclick="toggleTask(this)"></div>
+                <span class="task-text">Review flashcards</span>
+                <span class="task-tag">Study</span>
+              </div>
+            </div>
+
+            <div class="add-task">
+              <input type="text" id="new-task" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addTask()">
+              <button onclick="addTask()">+</button>
+            </div>
+          </div>
+
+          <!-- Weekly activity -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">This Week</div>
+              <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">Mon–Sun</span>
+            </div>
+            <div class="heatmap">
+              <!-- 7 days, varying intensity -->
+              <div class="heatmap-cell h2" title="Mon: 2 sessions"></div>
+              <div class="heatmap-cell h3" title="Tue: 4 sessions"></div>
+              <div class="heatmap-cell h1" title="Wed: 1 session"></div>
+              <div class="heatmap-cell h4" title="Thu: 6 sessions"></div>
+              <div class="heatmap-cell h3" title="Fri: 5 sessions"></div>
+              <div class="heatmap-cell h2" title="Sat: 3 sessions (today)"></div>
+              <div class="heatmap-cell h0" title="Sun: upcoming"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:12px;">
+              <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">Mon</span>
+              <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">Sun</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Bottom grid -->
+      <div class="bottom-grid">
+
+        <!-- Focus breakdown -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Focus Breakdown</div>
+            <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">This week</span>
+          </div>
+          <div class="progress-row">
+            <div class="progress-meta"><span>Deep Work</span><span>4h 20m</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:72%"></div></div>
+          </div>
+          <div class="progress-row">
+            <div class="progress-meta"><span>Study Sessions</span><span>2h 45m</span></div>
+            <div class="progress-bar"><div class="progress-fill green" style="width:46%"></div></div>
+          </div>
+          <div class="progress-row">
+            <div class="progress-meta"><span>Admin / Emails</span><span>1h 10m</span></div>
+            <div class="progress-bar"><div class="progress-fill accent" style="width:20%"></div></div>
+          </div>
+          <div class="progress-row" style="margin-bottom:0">
+            <div class="progress-meta"><span>Breaks</span><span>55m</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:16%;background:var(--muted)"></div></div>
+          </div>
+        </div>
+
+        <!-- Quick settings / Preferences -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Quick Settings</div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <div style="font-size:13px;font-weight:700;">Sound alerts</div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:2px;">Play a bell when timer ends</div>
+              </div>
+              <div class="toggle-switch active" onclick="toggleSwitch(this)" style="width:42px;height:24px;background:var(--ink);border-radius:12px;position:relative;cursor:none;transition:background .2s;flex-shrink:0;">
+                <div style="position:absolute;top:3px;right:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:right .2s;"></div>
+              </div>
+            </div>
+            <div style="height:1px;background:var(--rule);"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <div style="font-size:13px;font-weight:700;">Auto-start breaks</div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:2px;">Begin breaks automatically</div>
+              </div>
+              <div class="toggle-switch" onclick="toggleSwitch(this)" style="width:42px;height:24px;background:var(--rule-strong);border-radius:12px;position:relative;cursor:none;transition:background .2s;flex-shrink:0;">
+                <div style="position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .2s;"></div>
+              </div>
+            </div>
+            <div style="height:1px;background:var(--rule);"></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <div style="font-size:13px;font-weight:700;">Focus mode</div>
+                <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:2px;">Hide notifications during sessions</div>
+              </div>
+              <div class="toggle-switch active" onclick="toggleSwitch(this)" style="width:42px;height:24px;background:var(--ink);border-radius:12px;position:relative;cursor:none;transition:background .2s;flex-shrink:0;">
+                <div style="position:absolute;top:3px;right:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:right .2s;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ── Cursor ── */
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button, input, .task-check, .heatmap-cell, .nav-item, .stat-card').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('grow'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('grow'));
+  });
+
+  /* ── Toast ── */
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  /* ── Auth tab switch ── */
+  function switchTab(tab) {
+    const sinBtn = document.getElementById('signin-tab');
+    const supBtn = document.getElementById('signup-tab');
+    const sinForm = document.getElementById('signin-form');
+    const supForm = document.getElementById('signup-form');
+    if (tab === 'signin') {
+      sinBtn.classList.add('active'); supBtn.classList.remove('active');
+      sinForm.style.display = ''; supForm.style.display = 'none';
+    } else {
+      supBtn.classList.add('active'); sinBtn.classList.remove('active');
+      supForm.style.display = ''; sinForm.style.display = 'none';
+    }
+  }
+
+  /* ── Form validation ── */
+  function validateEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+  function handleSignIn() {
+    const email = document.getElementById('email-in').value.trim();
+    const pass = document.getElementById('pass-in').value;
+    let ok = true;
+    const ef = document.getElementById('field-email-in');
+    const pf = document.getElementById('field-pass-in');
+    ef.classList.toggle('error', !validateEmail(email)); if (!validateEmail(email)) ok = false;
+    pf.classList.toggle('error', !pass); if (!pass) ok = false;
+    if (ok) loadDashboard(email.split('@')[0]);
+  }
+
+  function handleSignUp() {
+    const email = document.getElementById('email-up').value.trim();
+    const pass = document.getElementById('pass-up').value;
+    let ok = true;
+    const ef = document.getElementById('field-email-up');
+    const pf = document.getElementById('field-pass-up');
+    ef.classList.toggle('error', !validateEmail(email)); if (!validateEmail(email)) ok = false;
+    pf.classList.toggle('error', pass.length < 8); if (pass.length < 8) ok = false;
+    const fn = document.getElementById('fname').value.trim() || 'User';
+    if (ok) loadDashboard(fn);
+  }
+
+  function loadDashboard(name) {
+    const displayName = name.charAt(0).toUpperCase() + name.slice(1);
+    document.getElementById('dash-name').textContent = displayName + ' Chen';
+    document.getElementById('dash-avatar').textContent = displayName.charAt(0).toUpperCase();
+    document.getElementById('greet-name').textContent = displayName + '.';
+
+    document.getElementById('auth-view').classList.remove('active');
+    document.getElementById('dashboard-view').classList.add('active');
+
+    const now = new Date();
+    const opts = { weekday:'long', month:'short', day:'numeric' };
+    const short = { weekday:'short', month:'short', day:'numeric' };
+    document.getElementById('top-date').textContent = now.toLocaleDateString('en-US', opts) + ' · ' + now.getFullYear();
+    document.getElementById('date-chip').textContent = now.toLocaleDateString('en-US', short);
+    showToast('Welcome back, ' + displayName + '!');
+    animateProgressBars();
+  }
+
+  function animateProgressBars() {
+    document.querySelectorAll('.progress-fill').forEach(bar => {
+      const w = bar.style.width;
+      bar.style.width = '0%';
+      setTimeout(() => { bar.style.width = w; }, 300);
+    });
+  }
+
+  function handleLogout() {
+    document.getElementById('dashboard-view').classList.remove('active');
+    document.getElementById('auth-view').classList.add('active');
+    showToast('Signed out successfully.');
+  }
+
+  /* ── Timer logic ── */
+  let timerInterval = null;
+  let totalSec = 25 * 60;
+  let remainSec = totalSec;
+  let running = false;
+  let sessCount = 3;
+  const circumference = 2 * Math.PI * 90; // 565.5
+
+  function updateTimerDisplay() {
+    const m = Math.floor(remainSec / 60).toString().padStart(2, '0');
+    const s = (remainSec % 60).toString().padStart(2, '0');
+    document.getElementById('timer-display').textContent = m + ':' + s;
+    const prog = (totalSec - remainSec) / totalSec;
+    const offset = circumference * (1 - prog);
+    document.getElementById('ring').style.strokeDashoffset = offset;
+  }
+
+  function toggleTimer() {
+    running = !running;
+    const icon = document.getElementById('play-icon');
+    if (running) {
+      icon.innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+      timerInterval = setInterval(() => {
+        if (remainSec <= 0) {
+          clearInterval(timerInterval);
+          running = false;
+          sessCount++;
+          document.getElementById('session-count').textContent = sessCount;
+          document.getElementById('until-break').textContent = Math.max(0, 4 - (sessCount % 4));
+          showToast('🎉 Session complete! Time for a break.');
+          icon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+          return;
+        }
+        remainSec--;
+        updateTimerDisplay();
+      }, 1000);
+    } else {
+      clearInterval(timerInterval);
+      icon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+    }
+  }
+
+  function resetTimer() {
+    clearInterval(timerInterval);
+    running = false;
+    remainSec = totalSec;
+    document.getElementById('play-icon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+    updateTimerDisplay();
+  }
+
+  function skipTimer() {
+    clearInterval(timerInterval);
+    running = false;
+    remainSec = 0;
+    updateTimerDisplay();
+    showToast('Session skipped.');
+    document.getElementById('play-icon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+  }
+
+  function setMode(btn, label, minutes, offset) {
+    document.querySelectorAll('.session-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    clearInterval(timerInterval); running = false;
+    totalSec = minutes * 60; remainSec = totalSec;
+    document.getElementById('timer-mode-label').textContent = label;
+    document.getElementById('play-icon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+    updateTimerDisplay();
+  }
+
+  function startTimer() {
+    if (!running) toggleTimer();
+    showToast('New focus session started!');
+  }
+
+  updateTimerDisplay();
+
+  /* ── Tasks ── */
+  function toggleTask(el) {
+    el.classList.toggle('done');
+    const text = el.nextElementSibling;
+    text.classList.toggle('done-text');
+    showToast(el.classList.contains('done') ? '✓ Task complete!' : 'Task marked incomplete.');
+  }
+
+  function addTask() {
+    const input = document.getElementById('new-task');
+    const val = input.value.trim();
+    if (!val) return;
+    const list = document.getElementById('task-list');
+    const item = document.createElement('div');
+    item.className = 'task-item';
+    item.innerHTML = `
+      <div class="task-check" onclick="toggleTask(this)"></div>
+      <span class="task-text">${val}</span>
+      <span class="task-tag">Personal</span>
+    `;
+    list.appendChild(item);
+    // reattach cursor grow listeners
+    item.querySelectorAll('.task-check').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('grow'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('grow'));
+    });
+    input.value = '';
+    showToast('Task added!');
+  }
+
+  /* ── Toggle switches ── */
+  function toggleSwitch(el) {
+    const dot = el.querySelector('div');
+    if (el.classList.contains('active')) {
+      el.classList.remove('active');
+      el.style.background = 'var(--rule-strong)';
+      dot.style.right = '';
+      dot.style.left = '3px';
+    } else {
+      el.classList.add('active');
+      el.style.background = 'var(--ink)';
+      dot.style.left = '';
+      dot.style.right = '3px';
+    }
+  }
+
+  /* ── Mobile sidebar ── */
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  /* Click outside sidebar to close on mobile */
+  document.addEventListener('click', (e) => {
+    const sb = document.getElementById('sidebar');
+    if (window.innerWidth <= 768 && sb.classList.contains('open')) {
+      if (!sb.contains(e.target) && !e.target.closest('.menu-toggle')) {
+        sb.classList.remove('open');
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
