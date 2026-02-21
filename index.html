@@ -4,305 +4,185 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FocusFlow – Study Smarter</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
- 
-  
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="honestyle.css" rel="stylesheet">
 </head>
-<style>
-
-  :root {
-      --primary-lime: #ccff00;
-      --text-main: #1a1a1a;
-      --text-gray: #666666;
-      --bg-light: #fff;
-      --border-color: rgba(0,0,0,0.08);
-      --nav-height: 70px;
-    }
-  
-    * {
-      margin: 0; padding:0; box-sizing: border-box;
-      font-family: "Inter", sans-serif;
-    }
-
-    body {
-      background-color:
-        var(--bg-light);
-      color: var(--text-main);
-      overflow-x: hidden;
-    }
-
-    /* ---------------- FLOATING NAV ---------------- */
-    .nav-wrapper {
-      position: fixed;
-      top: 20px;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      z-index: 2000;
-      padding: 0 5%;
-    }
-
-    nav {
-      width: 100%;
-      max-width: 1100px;
-      height: var(--nav-height);
-      background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--border-color);
-      border-radius: 30px; /* Essential pill shape */
-      padding: 0 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.04);
-    }
-
-    .logo { font-weight: 800; font-size: 20px; color: #000; letter-spacing: -0.2px; }
-    
-    .nav-links { display: flex; gap: 28px; align-items: center;text-decoration:none;}
-    .nav-links a { 
-      color: var(--text-main); text-decoration: none; 
-      font-size: 14px; font-weight: 500; transition: 0.2s;
-    }
-
-    .nav-btns { display: flex; gap: 12px; align-items: center; }
-    
-    .btn-login {
-      color: var(--text-main); text-decoration: none;
-      font-size: 14px; font-weight: 600; padding: 10px 20px;
-    }
-
-    .btn-lime {
-      background: var(--primary-lime);
-      color: #000; padding: 10px 24px;
-      border-radius: 50px; font-weight: 700;
-      text-decoration: none; border: none; cursor: pointer;
-      font-size: 14px;
-      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .btn-lime:hover { transform: scale(1.05); }
-
-    /* Hamburger */
-    .hamburger { display: none; cursor: pointer; flex-direction: column; gap: 5px; }
-    .hamburger span { width: 22px; height: 2px; background: #000; border-radius: 2px; }
-
-    /* Mobile Drawer */
-    .mobile-menu {
-      position: absolute; top: 85px; left: 0; right: 0;
-      background: white; border-radius: 24px; border: 1px solid var(--border-color);
-      padding: 24px; display: none; flex-direction: column; gap: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    }
-    .mobile-menu.active { display: flex; }
-
-    /* ---------------- HERO ---------------- */
-    .hero {
-  padding: 180px 20px 80px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-    .hero-content h1 {
-      font-size: 4.5rem; line-height: 1; letter-spacing: -3px; margin-bottom: 24px;
-          
-    }
-
-    .hero-content p {
-      font-size: 1.25rem;
-          color: var(--text-gray); margin-bottom: 40px; max-width: 500px; line-height: 1.5;
-          display: 
-    }
-
-    .hero-input-group {
-      display: flex; max-width: 480px; border: 1px solid var(--border-color);
-      border-radius: 100px; padding: 6px; background: #fff;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.02);
-    }
-
-    .hero-input-group input {
-      flex: 1; border: none; padding-left: 24px; outline: none; font-size: 16px; background: transparent;
-    }
-
-    /* ---------------- STATS ---------------- */
-    .stats {
-      display: flex; gap: 50px; margin-top: 60px;
-      padding-top: 40px; border-top: 1px solid var(--border-color);
-    }
-    .stat-item h2 { font-size: 2.5rem; letter-spacing: -1.5px; }
-    .stat-item p { font-size: 0.9rem; color: var(--text-gray); font-weight: 500; }
-
-    .hero-image { display: flex; justify-content: flex-end; }
-
-    /* ---------------- RESPONSIVE ---------------- */
-    @media(max-width: 1024px) {
-      .hero { grid-template-columns: 1fr; text-align: center; padding-top: 140px; }
-      .hero-content h1 { font-size: 3.5rem; letter-spacing: -1.5px; }
-      .hero-content p { margin: 0 auto 40px auto; }
-      .hero-input-group { margin: 0 auto; }
-      .hero-image { display: none; }
-      .stats { justify-content: center; }
-      .nav-links, .btn-login { display: none; }
-      .hamburger { display: flex; }
-    }
-
-/* ---------------- FOOTER ---------------- */
-.footer {
-  margin-top: 120px;
-  background: #fafafa;
-  border-top: 1px solid var(--border-color);
-  padding-top: 70px;
-}
-
-.footer-container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 20px;
-
-  display: flex;
-  justify-content: space-between;
-  gap: 60px;
-  flex-wrap: wrap;
-}
-
-.footer-logo {
-  font-weight: 800;
-  font-size: 22px;
-  margin-bottom: 10px;
-}
-
-.footer-brand p {
-  color: var(--text-gray);
-  font-size: 14px;
-  max-width: 250px;
-}
-
-.footer-links {
-  display: flex;
-  gap: 60px;
-  flex-wrap: wrap;
-}
-
-.footer-col {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.footer-col h4 {
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 10px;
-}
-
-.footer-col a {
-  text-decoration: none;
-  color: var(--text-gray);
-  font-size: 14px;
-  transition: 0.2s;
-}
-
-.footer-col a:hover {
-  color: var(--text-main);
-}
-
-.footer-bottom {
-  text-align: center;
-  margin-top: 60px;
-  padding: 25px 0;
-  font-size: 13px;
-  color: var(--text-gray);
-  border-top: 1px solid var(--border-color);
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-  .footer-container {
-    flex-direction: column;
-    gap: 40px;
-  }
-
-  .footer-links {
-    gap: 40px;
-  }
-
-</style>
 <body>
 
-  <div class="nav-wrapper">
-    <nav>
-      <div class="logo">FocusFlow</div>
-      
-      <div class="nav-links">
-        <a href="#">Product</a>
-        <a href="#">Why us</a>
-        <a href="#">Pricing</a>
-      </div>
+  <!-- Custom cursor -->
+  <div class="cursor" id="cursor"></div>
 
-      <div class="nav-btns">
-        <a href="#" class="btn-login">Log in</a>
-        <a href="#" class="btn-lime">Book a demo</a>
-        <div class="hamburger" onclick="toggleMenu()">
-          <span></span><span></span><span></span>
-        </div>
+  <!-- NAV -->
+  <nav>
+    <div class="logo">FocusFlow</div>
+    <div class="nav-links">
+      <a href="#">Product</a>
+      <a href="#">Why us</a>
+      <a href="#">Pricing</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <a href="signup.html" style="font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;letter-spacing:0.05em;">Log in</a>
+      <a href="signup.html" class="nav-cta">Book a demo</a>
+      <div class="hamburger" onclick="this.classList.toggle('open')">
+        <span></span><span></span><span></span>
       </div>
+    </div>
+  </nav>
 
-      <div class="mobile-menu" id="mobileMenu">
-        <a href="#">Product</a>
-        <a href="#">Why us</a>
-        <a href="#">Pricing</a>
-        <hr style="border: none; border-top: 1px solid var(--border-color);">
-        <a href="#" class="btn-lime" style="text-align: center;">Book a demo</a>
-      </div>
-    </nav>
-  </div>
-
+  <!-- HERO -->
   <section class="hero">
-    <div class="hero-content">
-      <h1>Put focus <span style="text-decoration: underline; text-decoration-color: var(--primary-lime); text-underline-offset: 8px;">first</span></h1>
-      <p>A minimalist Pomodoro experience built for deep work. Streamline your day and track your progress in real-time.</p>
-      
-      <div class="hero-input-group">
-        <input type="email" placeholder="Enter work email">
-        <button class="btn-lime">Start Free</button>
+    <div class="hero-left">
+      <div>
+        <div class="hero-tag">Pomodoro Productivity Tool</div>
+        <h1>Deep<br>work,<br><em>finally</em><br>done.</h1>
+        <p class="hero-sub">A minimal, razor-sharp Pomodoro experience for people who take their focus seriously. No noise — just time, intention, and progress.</p>
+
+        <form class="email-form" onsubmit="return false">
+          <input type="email" placeholder="your@email.com">
+          <button type="submit">Start Free →</button>
+        </form>
       </div>
 
-      <div class="stats">
-        <div class="stat-item">
+      <div class="hero-stats">
+        <div class="stat">
           <h2>98%</h2>
           <p>Daily focus rate</p>
         </div>
-        <div class="stat-item">
+        <div class="stat">
           <h2>~150k</h2>
           <p>Productive users</p>
+        </div>
+        <div class="stat">
+          <h2>4.9★</h2>
+          <p>User satisfaction</p>
         </div>
       </div>
     </div>
 
-    <div class="hero-image">
-      <svg width="450" height="450" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 30px 60px rgba(0,0,0,0.08));">
-         <rect x="100" y="50" width="280" height="400" rx="40" fill="white" stroke="#eee" stroke-width="2"/>
-         <rect x="130" y="90" width="220" height="30" rx="10" fill="#f9f9f9"/>
-         <circle cx="240" cy="240" r="70" stroke="var(--primary-lime)" stroke-width="15" stroke-dasharray="300 100"/>
-         <rect x="150" y="340" width="180" height="60" rx="15" fill="#f0f0f0"/>
-         <rect x="320" y="100" width="120" height="120" rx="20" fill="white" style="filter: drop-shadow(0 10px 20px rgba(0,0,0,0.05));"/>
-         <path d="M350 140H410" stroke="#000" stroke-width="4" stroke-linecap="round"/>
-         <path d="M350 160H390" stroke="#ccc" stroke-width="4" stroke-linecap="round"/>
-      </svg>
+    <div class="hero-right">
+      <!-- Decorative grid handled by ::before -->
+      <div class="app-card">
+        <div class="app-card-label">Current Session</div>
+
+        <div class="timer-display">24:07</div>
+        <div class="timer-mode">● Deep Focus</div>
+
+        <div class="ring-wrap">
+          <svg width="200" height="200" viewBox="0 0 100 100">
+            <circle class="ring-bg" cx="50" cy="50" r="45" fill="none" stroke-width="4"/>
+            <circle class="ring-progress" cx="50" cy="50" r="45" fill="none" stroke-width="4"/>
+          </svg>
+        </div>
+
+        <button class="timer-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          Pause Session
+        </button>
+      </div>
+
+      <div class="float-badge">
+        <div class="badge-dot"></div>
+        <div class="badge-text">
+          <strong>3 sessions completed</strong>
+          <span>+45 focus points today</span>
+        </div>
+      </div>
     </div>
   </section>
 
-  <footer class="footer">
-  <div class="footer-container">
+  <!-- MARQUEE -->
+  <div class="marquee-section">
+    <div class="marquee-track">
+      <div class="marquee-item"><span class="dot"></span>Deep Focus Mode</div>
+      <div class="marquee-item"><span class="dot"></span>Session Tracking</div>
+      <div class="marquee-item"><span class="dot"></span>Distraction Blocker</div>
+      <div class="marquee-item"><span class="dot"></span>Progress Analytics</div>
+      <div class="marquee-item"><span class="dot"></span>Custom Intervals</div>
+      <div class="marquee-item"><span class="dot"></span>Focus Score</div>
+      <!-- repeat for seamless loop -->
+      <div class="marquee-item"><span class="dot"></span>Deep Focus Mode</div>
+      <div class="marquee-item"><span class="dot"></span>Session Tracking</div>
+      <div class="marquee-item"><span class="dot"></span>Distraction Blocker</div>
+      <div class="marquee-item"><span class="dot"></span>Progress Analytics</div>
+      <div class="marquee-item"><span class="dot"></span>Custom Intervals</div>
+      <div class="marquee-item"><span class="dot"></span>Focus Score</div>
+    </div>
+  </div>
 
-    <!-- Logo + tagline -->
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="feature">
+      <div class="feature-num">01</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h3>Smart Timer</h3>
+      <p>Adaptive intervals that learn from your session patterns and suggest optimal break lengths based on your focus history.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">02</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <h3>Live Analytics</h3>
+      <p>Track your focus streaks, peak performance windows, and productivity trends in a clean, distraction-free dashboard.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">03</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      </div>
+      <h3>Deep Work Mode</h3>
+      <p>Block distractions, silence notifications, and enter a protected flow state that respects your most critical work time.</p>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonial-section">
+    <div class="testimonial-label">
+      <h2>What deep workers say</h2>
+      <div class="mono">150k+ users worldwide</div>
+    </div>
+    <div class="testimonial-cards">
+      <div class="t-card">
+        <p class="t-quote">"I've tried every productivity app. FocusFlow is the only one that respects my time and doesn't try to gamify everything into oblivion."</p>
+        <div class="t-author">
+          <div class="t-avatar">S</div>
+          <div class="t-info">
+            <strong>Sara K.</strong>
+            <span>PhD Candidate, MIT</span>
+          </div>
+        </div>
+      </div>
+      <div class="t-card">
+        <p class="t-quote">"The minimalism is the feature. No badges, no leaderboards — just clear, honest tracking of how I spent my time."</p>
+        <div class="t-author">
+          <div class="t-avatar">M</div>
+          <div class="t-info">
+            <strong>Marcus L.</strong>
+            <span>Senior Engineer, Stripe</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Ready to do your<br>best <em>work?</em></h2>
+    <form class="cta-form" onsubmit="return false">
+      <input type="email" placeholder="your@email.com">
+      <button>Start Free →</button>
+    </form>
+    <p class="cta-note">No credit card required · Free forever plan available</p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
     <div class="footer-brand">
-      <h2 class="footer-logo">FocusFlow</h2>
+      <div class="logo">FocusFlow</div>
       <p>Minimal focus tools for deep work.</p>
     </div>
-
-    <!-- Links -->
     <div class="footer-links">
       <div class="footer-col">
         <h4>Product</h4>
@@ -310,47 +190,48 @@
         <a href="#">Pricing</a>
         <a href="#">Updates</a>
       </div>
-
       <div class="footer-col">
         <h4>Company</h4>
         <a href="#">About</a>
         <a href="#">Contact</a>
         <a href="#">Blog</a>
       </div>
-
       <div class="footer-col">
         <h4>Legal</h4>
         <a href="#">Privacy</a>
         <a href="#">Terms</a>
       </div>
     </div>
+  </footer>
 
-  </div>
-
-  <!-- Bottom bar -->
   <div class="footer-bottom">
-    <p>© 2026 FocusFlow. Built for students & deep workers.</p>
+    <span>© 2026 FocusFlow. Built for students & deep workers.</span>
+    <span>Made with intention.</span>
   </div>
-</footer>
-  
+
   <script>
-    function toggleMenu() {
-      document.getElementById('mobileMenu').classList.toggle('active');
-    }
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+    document.querySelectorAll('a, button, input').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('grow'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('grow'));
+    });
+
+    // Scroll reveal for features
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 120);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('.feature').forEach(el => observer.observe(el));
   </script>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-
-<script>
-const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
-const SUPABASE_KEY = "YOUR_PUBLIC_ANON_KEY";
-
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-</script>
 
 </body>
 </html>
