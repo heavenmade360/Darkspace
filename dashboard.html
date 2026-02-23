@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>FocusFlow — Dashboard</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    :root { --sidebar: 248px; }
+    body { background: var(--bg-2); overflow: hidden; }
+
+    /* ── LAYOUT ── */
+    .app { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar); height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      flex-shrink: 0;
+      overflow-y: auto;
+      position: relative; z-index: 50;
+    }
+
+    .sidebar-top { padding: 20px 16px 0; }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; font-family: var(--font-serif); font-size: 1.2rem; color: var(--ink); padding: 8px 8px 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo-dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
+
+    .sidebar-section { padding: 20px 10px 8px; }
+    .sidebar-section-label { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-4); padding: 0 8px; margin-bottom: 4px; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 10px; border-radius: var(--r-md);
+      font-size: 0.875rem; font-weight: 600; color: var(--ink-3);
+      cursor: pointer; transition: all var(--t-fast) var(--ease);
+      position: relative; text-decoration: none;
+    }
+    .nav-item svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+    .nav-item:hover { background: var(--bg-2); color: var(--ink); }
+    .nav-item.active { background: var(--accent-dim); color: var(--accent); }
+    .nav-item.active svg { stroke: var(--accent); }
+    .nav-badge { margin-left: auto; background: var(--accent); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 7px; border-radius: var(--r-full); }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .user-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px; border-radius: var(--r-lg);
+      cursor: pointer;
+      transition: background var(--t-fast);
+    }
+    .user-card:hover { background: var(--bg-2); }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--grad-accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-serif); font-size: 0.9rem; color: #fff;
+      flex-shrink: 0;
+    }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 0.875rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-plan { font-size: 0.72rem; color: var(--ink-3); }
+    .logout-btn { padding: 6px; border-radius: var(--r-md); color: var(--ink-4); transition: all var(--t-fast); flex-shrink: 0; }
+    .logout-btn:hover { background: var(--red-dim); color: var(--red); }
+    .logout-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; display: block; }
+
+    /* ── MAIN ── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .topbar {
+      height: 60px; padding: 0 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .topbar-title h2 { font-family: var(--font-serif); font-size: 1.25rem; letter-spacing: -0.3px; }
+    .topbar-title p { font-size: 0.78rem; color: var(--ink-3); margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    .content { flex: 1; overflow-y: auto; padding: 28px; }
+
+    /* ── GREETING ── */
+    .greeting { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+    .greeting h1 { font-family: var(--font-serif); font-size: clamp(1.6rem,2.5vw,2.2rem); letter-spacing: -0.5px; margin-bottom: 4px; }
+    .greeting h1 em { color: var(--accent); }
+    .greeting p { font-size: 0.875rem; color: var(--ink-3); }
+    .today-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-full); font-size: 0.8125rem; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+    .today-chip span { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse-chip { 0%,100%{opacity:1}50%{opacity:0.5} }
+
+    /* ── STATS CARDS ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--r-xl); padding: 20px 24px;
+      transition: box-shadow var(--t-base), transform var(--t-base);
+    }
+    .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .stat-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .stat-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+    .stat-icon { width: 32px; height: 32px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; }
+    .stat-icon svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+    .si-orange { background: var(--accent-dim); color: var(--accent); }
+    .si-green  { background: var(--green-dim);  color: var(--green); }
+    .si-blue   { background: rgba(59,130,246,.08); color: #3b82f6; }
+    .si-purple { background: rgba(124,58,237,.08); color: #7c3aed; }
+    .stat-value { font-family: var(--font-serif); font-size: 2rem; letter-spacing: -1px; line-height: 1; margin-bottom: 6px; }
+    .stat-delta { font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+    .delta-up { color: var(--green); }
+    .delta-down { color: var(--red); }
+    .delta-neutral { color: var(--ink-3); }
+
+    /* ── MAIN GRID ── */
+    .main-grid { display: grid; grid-template-columns: 1fr 320px; gap: 20px; }
+
+    /* ── TIMER CARD ── */
+    .timer-card {
+      background: var(--ink); border-radius: var(--r-2xl);
+      padding: 32px; display: flex; flex-direction: column;
+      align-items: center; text-align: center; color: var(--bg);
+    }
+    .session-tabs { display: flex; background: rgba(255,255,255,0.06); border-radius: var(--r-full); padding: 4px; gap: 4px; margin-bottom: 32px; }
+    .s-tab { padding: 8px 18px; border-radius: var(--r-full); font-size: 0.8125rem; font-weight: 700; color: rgba(255,255,255,0.45); cursor: pointer; transition: all var(--t-base) var(--ease); white-space: nowrap; }
+    .s-tab.active { background: var(--grad-accent); color: #fff; box-shadow: var(--shadow-a); }
+
+    .ring-wrap { position: relative; width: 180px; height: 180px; margin-bottom: 24px; }
+    .ring-wrap svg { transform: rotate(-90deg); position: absolute; inset: 0; }
+    .ring-bg { stroke: rgba(255,255,255,0.07); }
+    .ring-fg { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 0.8s var(--ease); }
+    .ring-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+    .ring-time { font-family: var(--font-serif); font-size: 2.8rem; letter-spacing: -2px; line-height: 1; }
+    .ring-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+
+    .timer-controls { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+    .t-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background var(--t-fast); border: none; color: rgba(255,255,255,0.5); }
+    .t-btn:hover { background: rgba(255,255,255,0.14); color: rgba(255,255,255,0.9); }
+    .t-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; }
+    .t-btn-main { width: 56px; height: 56px; background: var(--grad-accent); box-shadow: var(--shadow-a); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; transition: transform var(--t-fast), box-shadow var(--t-fast); }
+    .t-btn-main:hover { transform: scale(1.06); box-shadow: 0 12px 36px rgba(249,115,22,0.35); }
+    .t-btn-main svg { width: 20px; height: 20px; fill: #fff; stroke: none; }
+
+    .timer-meta { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; width: 100%; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.07); }
+    .tm-item span { display: block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 4px; }
+    .tm-item strong { font-family: var(--font-serif); font-size: 1.4rem; letter-spacing: -0.5px; }
+
+    /* ── RIGHT COLUMN ── */
+    .right-col { display: flex; flex-direction: column; gap: 16px; }
+
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 20px; }
+    .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .panel-title { font-size: 0.9375rem; font-weight: 700; }
+    .panel-link { font-size: 0.78rem; font-weight: 700; color: var(--accent); transition: opacity 0.15s; }
+    .panel-link:hover { opacity: 0.7; }
+
+    /* Tasks */
+    .task-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+    .task-item:last-child { border: none; padding-bottom: 0; }
+    .task-cb { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--border-md); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all var(--t-fast); }
+    .task-cb.done { background: var(--green); border-color: var(--green); }
+    .task-cb.done::after { content:''; width:9px; height:5.5px; border-left:2px solid #fff; border-bottom:2px solid #fff; transform:rotate(-45deg) translate(0.5px,-1px); display:block; }
+    .task-text { flex:1; font-size:0.875rem; font-weight:600; transition:color var(--t-fast); }
+    .task-text.done { text-decoration:line-through; color:var(--ink-4); font-weight:500; }
+    .task-tag { font-size:0.68rem; font-weight:700; padding:3px 8px; border-radius:var(--r-full); background:var(--bg-2); color:var(--ink-3); flex-shrink:0; }
+    .add-task-row { display:flex; gap:8px; margin-top:12px; }
+    .add-task-row input { flex:1; padding:9px 12px; border:1.5px solid var(--border-md); border-radius:var(--r-md); font-size:0.875rem; background:var(--bg); outline:none; transition:border-color 0.15s; }
+    .add-task-row input:focus { border-color:var(--accent); }
+    .add-task-row button { width:34px; height:34px; border-radius:var(--r-md); background:var(--ink); color:#fff; font-size:1.1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background var(--t-fast); border:none; cursor:pointer; }
+    .add-task-row button:hover { background:var(--accent); }
+
+    /* Activity heatmap */
+    .heatmap { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:10px; }
+    .hm-cell { aspect-ratio:1; border-radius:3px; cursor:pointer; transition:transform var(--t-fast); }
+    .hm-cell:hover { transform:scale(1.2); }
+    .h0{background:var(--bg-2)} .h1{background:rgba(249,115,22,.18)} .h2{background:rgba(249,115,22,.38)} .h3{background:rgba(249,115,22,.62)} .h4{background:var(--accent)}
+    .hm-days { display:grid; grid-template-columns:repeat(7,1fr); }
+    .hm-day { font-size:0.65rem; font-weight:700; color:var(--ink-4); text-align:center; }
+
+    /* Focus breakdown */
+    .fb-row { margin-bottom:14px; }
+    .fb-row:last-child { margin-bottom:0; }
+    .fb-meta { display:flex; justify-content:space-between; margin-bottom:6px; }
+    .fb-meta span:first-child { font-size:0.875rem; font-weight:600; }
+    .fb-meta span:last-child { font-size:0.8125rem; color:var(--ink-3); font-weight:600; }
+    .fb-bar { height:5px; background:var(--bg-2); border-radius:3px; overflow:hidden; }
+    .fb-fill { height:100%; border-radius:3px; transition:width 1s var(--ease); }
+    .fill-ink{background:var(--ink)} .fill-orange{background:var(--accent)} .fill-green{background:var(--green)} .fill-gray{background:var(--ink-4)}
+
+    /* ── MOBILE TOPBAR ── */
+    .mobile-topbar { display:none; height:56px; padding:0 20px; background:var(--surface); border-bottom:1px solid var(--border); align-items:center; justify-content:space-between; flex-shrink:0; }
+    .mobile-logo { font-family:var(--font-serif); font-size:1.2rem; }
+    .mobile-menu-btn { padding:8px; border-radius:var(--r-md); background:none; border:none; cursor:pointer; }
+    .mobile-menu-btn svg { width:20px; height:20px; stroke:var(--ink); fill:none; stroke-width:2; stroke-linecap:round; display:block; }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:1100px){
+      .stat-grid{grid-template-columns:repeat(2,1fr)}
+      .main-grid{grid-template-columns:1fr}
+      .right-col{display:grid;grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:768px){
+      :root{--sidebar:280px}
+      body{overflow:auto}
+      .app{flex-direction:column;height:auto;min-height:100vh}
+      .sidebar{position:fixed;top:0;left:0;bottom:0;transform:translateX(-100%);transition:transform var(--t-base) var(--ease);z-index:200;box-shadow:var(--shadow-xl)}
+      .sidebar.open{transform:translateX(0)}
+      .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:199}
+      .sidebar-overlay.show{display:block}
+      .main{height:auto}
+      .topbar{display:none}
+      .mobile-topbar{display:flex}
+      .content{padding:20px 16px}
+      .stat-grid{grid-template-columns:1fr 1fr}
+      .main-grid{grid-template-columns:1fr}
+      .right-col{display:flex;flex-direction:column}
+    }
+    @media(max-width:480px){
+      .stat-grid{grid-template-columns:1fr}
+      .session-tabs{flex-wrap:wrap}
+    }
+  </style>
+</head>
+<body>
+
+<div id="toast">
+  <svg class="toast-icon" viewBox="0 0 20 20" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><polyline points="4 10 8 14 16 6"/></svg>
+  <span class="toast-msg"></span>
+</div>
+
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+    <div class="sidebar-top">
+      <div class="sidebar-logo">FocusFlow<span class="sidebar-logo-dot"></span></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Workspace</div>
+      <a class="nav-item active" href="dashboard.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="#" onclick="showToast('Sessions page coming soon!');return false">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Sessions
+        <span class="nav-badge">3</span>
+      </a>
+      <a class="nav-item" href="#" onclick="showToast('Full tasks view coming soon!');return false">
+        <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Tasks
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Insights</div>
+      <a class="nav-item" href="#" onclick="showToast('Analytics coming soon!');return false">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Analytics
+      </a>
+      <a class="nav-item" href="#" onclick="showToast('Calendar coming soon!');return false">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Calendar
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Account</div>
+      <a class="nav-item" href="#" onclick="showToast('Settings coming soon!');return false">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+      <a class="nav-item" href="index.html" style="color:var(--ink-3)">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Back to site
+      </a>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-avatar" id="user-avatar">A</div>
+        <div class="user-info">
+          <div class="user-name" id="user-name">Alex Chen</div>
+          <div class="user-plan">Free Plan</div>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()" title="Sign out">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- Mobile topbar -->
+    <div class="mobile-topbar">
+      <span class="mobile-logo">FocusFlow</span>
+      <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Open navigation">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Desktop topbar -->
+    <div class="topbar">
+      <div class="topbar-title">
+        <h2>Dashboard</h2>
+        <p id="topbar-date">Loading…</p>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" onclick="startSession()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="#fff" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          New Session
+        </button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- Greeting -->
+      <div class="greeting">
+        <div>
+          <h1>Good <em id="time-of-day">morning</em>, <span id="greet-name">Alex.</span></h1>
+          <p>You have <strong>4 tasks</strong> left today. Keep it up — you're on a 7-day streak 🔥</p>
+        </div>
+        <div class="today-chip">
+          <span></span>
+          <span id="today-date">Loading…</span>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-card-top">
+            <span class="stat-label">Focus time</span>
+            <div class="stat-icon si-orange"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          </div>
+          <div class="stat-value">3h 24m</div>
+          <div class="stat-delta delta-up">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
+            +28min vs yesterday
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-top">
+            <span class="stat-label">Sessions</span>
+            <div class="stat-icon si-green"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+          </div>
+          <div class="stat-value" id="session-count-stat">3</div>
+          <div class="stat-delta delta-neutral">Goal: 6 today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-top">
+            <span class="stat-label">Streak</span>
+            <div class="stat-icon si-blue"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+          </div>
+          <div class="stat-value">7 🔥</div>
+          <div class="stat-delta delta-up">Personal best!</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-top">
+            <span class="stat-label">Tasks done</span>
+            <div class="stat-icon si-purple"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+          </div>
+          <div class="stat-value">4 / 8</div>
+          <div class="stat-delta delta-neutral">50% complete</div>
+        </div>
+      </div>
+
+      <!-- Main grid -->
+      <div class="main-grid">
+
+        <!-- Timer -->
+        <div class="timer-card">
+          <div class="session-tabs">
+            <div class="s-tab active" onclick="setMode(this,'Focus',25)">Focus</div>
+            <div class="s-tab" onclick="setMode(this,'Short Break',5)">Short Break</div>
+            <div class="s-tab" onclick="setMode(this,'Long Break',15)">Long Break</div>
+          </div>
+
+          <div class="ring-wrap">
+            <svg width="180" height="180" viewBox="0 0 180 180">
+              <circle class="ring-bg" cx="90" cy="90" r="80" fill="none" stroke-width="6"/>
+              <circle class="ring-fg" id="ring" cx="90" cy="90" r="80" fill="none" stroke-width="6"
+                stroke-dasharray="503" stroke-dashoffset="0"/>
+            </svg>
+            <div class="ring-inner">
+              <div class="ring-time" id="timer-display">25:00</div>
+              <div class="ring-label" id="timer-mode-label">Focus</div>
+            </div>
+          </div>
+
+          <div class="timer-controls">
+            <button class="t-btn" onclick="resetTimer()" title="Reset">
+              <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+            </button>
+            <button class="t-btn-main" id="play-btn" onclick="toggleTimer()" aria-label="Play/Pause">
+              <svg id="play-icon" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+            <button class="t-btn" onclick="skipTimer()" title="Skip">
+              <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4" fill="currentColor" stroke="none"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+            </button>
+          </div>
+
+          <div class="timer-meta">
+            <div class="tm-item"><span>Sessions</span><strong id="sessions-done">3</strong></div>
+            <div class="tm-item"><span>Until break</span><strong id="until-break">1</strong></div>
+            <div class="tm-item"><span>Daily goal</span><strong>6</strong></div>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div class="right-col">
+
+          <!-- Tasks -->
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">Today's Tasks</span>
+              <a href="#" class="panel-link" onclick="showToast('Full task view coming!');return false">View all →</a>
+            </div>
+            <div id="task-list">
+              <div class="task-item">
+                <div class="task-cb done" onclick="toggleTask(this)"></div>
+                <span class="task-text done">Read research paper</span>
+                <span class="task-tag">Study</span>
+              </div>
+              <div class="task-item">
+                <div class="task-cb done" onclick="toggleTask(this)"></div>
+                <span class="task-text done">Review pull requests</span>
+                <span class="task-tag">Work</span>
+              </div>
+              <div class="task-item">
+                <div class="task-cb" onclick="toggleTask(this)"></div>
+                <span class="task-text">Draft project proposal</span>
+                <span class="task-tag">Work</span>
+              </div>
+              <div class="task-item">
+                <div class="task-cb" onclick="toggleTask(this)"></div>
+                <span class="task-text">Reply to client emails</span>
+                <span class="task-tag">Admin</span>
+              </div>
+              <div class="task-item">
+                <div class="task-cb" onclick="toggleTask(this)"></div>
+                <span class="task-text">Review flashcards</span>
+                <span class="task-tag">Study</span>
+              </div>
+            </div>
+            <div class="add-task-row">
+              <input type="text" id="new-task" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addTask()"/>
+              <button onclick="addTask()">+</button>
+            </div>
+          </div>
+
+          <!-- Weekly heatmap -->
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">This Week</span>
+              <span style="font-size:0.75rem;color:var(--ink-3);font-weight:600">Mon–Sun</span>
+            </div>
+            <div class="heatmap">
+              <div class="hm-cell h2" title="Mon: 2 sessions"></div>
+              <div class="hm-cell h4" title="Tue: 6 sessions"></div>
+              <div class="hm-cell h1" title="Wed: 1 session"></div>
+              <div class="hm-cell h3" title="Thu: 4 sessions"></div>
+              <div class="hm-cell h4" title="Fri: 6 sessions"></div>
+              <div class="hm-cell h2" title="Sat: 3 sessions (today)"></div>
+              <div class="hm-cell h0" title="Sun: upcoming"></div>
+            </div>
+            <div class="hm-days">
+              <div class="hm-day">M</div><div class="hm-day">T</div><div class="hm-day">W</div>
+              <div class="hm-day">T</div><div class="hm-day">F</div><div class="hm-day">S</div><div class="hm-day">S</div>
+            </div>
+          </div>
+
+          <!-- Focus breakdown -->
+          <div class="panel">
+            <div class="panel-header">
+              <span class="panel-title">Focus Breakdown</span>
+              <span style="font-size:0.75rem;color:var(--ink-3);font-weight:600">This week</span>
+            </div>
+            <div class="fb-row">
+              <div class="fb-meta"><span>Deep Work</span><span>4h 20m</span></div>
+              <div class="fb-bar"><div class="fb-fill fill-ink" style="width:72%"></div></div>
+            </div>
+            <div class="fb-row">
+              <div class="fb-meta"><span>Study</span><span>2h 45m</span></div>
+              <div class="fb-bar"><div class="fb-fill fill-green" style="width:46%"></div></div>
+            </div>
+            <div class="fb-row">
+              <div class="fb-meta"><span>Admin</span><span>1h 10m</span></div>
+              <div class="fb-bar"><div class="fb-fill fill-orange" style="width:20%"></div></div>
+            </div>
+            <div class="fb-row">
+              <div class="fb-meta"><span>Breaks</span><span>55m</span></div>
+              <div class="fb-bar"><div class="fb-fill fill-gray" style="width:15%"></div></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="utils.js"></script>
+<script>
+  // ── Date/Time ──
+  function setGreeting() {
+    const h = new Date().getHours();
+    const greet = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+    document.getElementById('time-of-day').textContent = greet;
+    const d = new Date();
+    const short = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const long  = d.toLocaleDateString('en-US',{weekday:'long', month:'short',day:'numeric'}) + ' · ' + d.getFullYear();
+    document.getElementById('today-date').textContent = short;
+    const tb = document.getElementById('topbar-date');
+    if (tb) tb.textContent = long;
+  }
+  setGreeting();
+
+  // ── Load user from Supabase ──
+  // async function loadUser() {
+  //   const user = await requireAuth();
+  //   if (!user) return;
+  //   const name = user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'User';
+  //   document.getElementById('greet-name').textContent = name + '.';
+  //   document.getElementById('user-name').textContent = user.user_metadata?.full_name || user.email;
+  //   document.getElementById('user-avatar').textContent = name[0].toUpperCase();
+  // }
+  // loadUser();
+
+  // ── Sidebar (mobile) ──
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('show');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  }
+
+  // ── Timer ──
+  let totalSec = 25*60, remainSec = 25*60, running = false, interval = null;
+  const CIRC = 503;
+
+  function updateDisplay() {
+    const m = String(Math.floor(remainSec/60)).padStart(2,'0');
+    const s = String(remainSec%60).padStart(2,'0');
+    document.getElementById('timer-display').textContent = m+':'+s;
+    const pct = (totalSec-remainSec)/totalSec;
+    document.getElementById('ring').style.strokeDashoffset = CIRC*pct;
+  }
+
+  function toggleTimer() {
+    running = !running;
+    const icon = document.getElementById('play-icon');
+    if (running) {
+      icon.innerHTML = '<rect x="6" y="4" width="4" height="16" fill="#fff"/><rect x="14" y="4" width="4" height="16" fill="#fff"/>';
+      interval = setInterval(() => {
+        if (remainSec <= 0) {
+          clearInterval(interval); running = false;
+          icon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3" fill="#fff"/>';
+          const done = parseInt(document.getElementById('sessions-done').textContent) + 1;
+          document.getElementById('sessions-done').textContent = done;
+          document.getElementById('session-count-stat').textContent = done;
+          document.getElementById('until-break').textContent = Math.max(0, 4-(done%4));
+          showToast('🎉 Session complete! Time for a break.');
+          return;
+        }
+        remainSec--; updateDisplay();
+      }, 1000);
+    } else {
+      clearInterval(interval);
+      icon.innerHTML = '<polygon points="5 3 19 12 5 21 5 3" fill="#fff"/>';
+    }
+  }
+
+  function resetTimer() {
+    clearInterval(interval); running = false;
+    remainSec = totalSec; updateDisplay();
+    document.getElementById('play-icon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3" fill="#fff"/>';
+  }
+
+  function skipTimer() {
+    clearInterval(interval); running = false; remainSec = 0; updateDisplay();
+    document.getElementById('play-icon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3" fill="#fff"/>';
+    showToast('Session skipped.');
+  }
+
+  function setMode(el, label, min) {
+    document.querySelectorAll('.s-tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    clearInterval(interval); running = false;
+    totalSec = min*60; remainSec = totalSec;
+    document.getElementById('timer-mode-label').textContent = label;
+    document.getElementById('play-icon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3" fill="#fff"/>';
+    updateDisplay();
+  }
+
+  function startSession() { if(!running) toggleTimer(); showToast('New focus session started!'); }
+
+  updateDisplay();
+
+  // ── Tasks ──
+  function toggleTask(cb) {
+    cb.classList.toggle('done');
+    const txt = cb.nextElementSibling;
+    txt.classList.toggle('done');
+    showToast(cb.classList.contains('done') ? '✓ Task complete!' : 'Task marked incomplete.');
+  }
+
+  function addTask() {
+    const inp = document.getElementById('new-task');
+    const val = inp.value.trim(); if (!val) return;
+    const list = document.getElementById('task-list');
+    const div = document.createElement('div');
+    div.className = 'task-item';
+    div.innerHTML = `<div class="task-cb" onclick="toggleTask(this)"></div><span class="task-text">${val}</span><span class="task-tag">Personal</span>`;
+    list.appendChild(div);
+    inp.value = '';
+    showToast('Task added!');
+  }
+
+  // ── Logout ──
+  async function handleLogout() {
+    // const sb = getSupabase();
+    // await sb.auth.signOut();
+    window.location.href = 'auth.html';
+  }
+</script>
+</body>
+</html>

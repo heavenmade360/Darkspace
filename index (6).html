@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="description" content="FocusFlow — The Pomodoro tool built for deep work. Track sessions, crush goals, and build your best focus habits."/>
+  <title>FocusFlow — Deep Work, Simplified</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    /* ── HERO ─────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: calc(var(--nav-h) + 60px) clamp(20px,4vw,48px) 80px;
+      background: var(--grad-hero);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 0%, rgba(249,115,22,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 60%, rgba(249,115,22,0.05) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-eyebrow { margin-bottom: 28px; animation: fadeUp 0.7s 0.1s both; }
+    .hero h1 { max-width: 760px; margin-bottom: 24px; animation: fadeUp 0.7s 0.2s both; }
+    .hero h1 em { color: var(--accent); }
+    .hero-sub { max-width: 520px; color: var(--ink-3); margin-bottom: 44px; animation: fadeUp 0.7s 0.35s both; }
+    .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; animation: fadeUp 0.7s 0.45s both; margin-bottom: 20px; }
+    .hero-note { font-size: 0.8rem; color: var(--ink-4); animation: fadeUp 0.7s 0.55s both; }
+    .hero-note span { color: var(--green); font-weight: 700; }
+
+    /* App Preview */
+    .hero-preview {
+      margin-top: 72px; width: 100%; max-width: 760px;
+      animation: fadeUp 0.8s 0.65s both;
+      position: relative;
+    }
+    .hero-preview-glow {
+      position: absolute; inset: -20px;
+      background: radial-gradient(ellipse at 50% 80%, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+    .app-mockup {
+      background: var(--surface);
+      border: 1px solid var(--border-md);
+      border-radius: var(--r-2xl);
+      box-shadow: var(--shadow-xl), 0 0 0 1px rgba(255,255,255,0.9) inset;
+      overflow: hidden;
+      position: relative; z-index: 1;
+    }
+    .mockup-bar {
+      height: 44px; background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 20px; gap: 8px;
+    }
+    .mockup-dot { width: 11px; height: 11px; border-radius: 50%; }
+    .mockup-dot:nth-child(1) { background: #ff5f57; }
+    .mockup-dot:nth-child(2) { background: #febc2e; }
+    .mockup-dot:nth-child(3) { background: #28c840; }
+    .mockup-url { margin-left: 16px; flex: 1; height: 24px; background: var(--bg-2); border-radius: 6px; max-width: 320px; }
+    .mockup-body { padding: 32px; display: grid; grid-template-columns: 1fr 260px; gap: 24px; min-height: 360px; }
+    .mockup-timer-col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+    .mockup-ring { width: 140px; height: 140px; position: relative; }
+    .mockup-ring svg { transform: rotate(-90deg); }
+    .mockup-ring-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .mockup-time { font-family: var(--font-serif); font-size: 2rem; letter-spacing: -1px; }
+    .mockup-mode { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+    .mockup-btns { display: flex; gap: 10px; }
+    .mockup-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--bg-2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
+    .mockup-btn-main { background: var(--accent); border-color: var(--accent); }
+    .mockup-btn-main svg { stroke: #fff; }
+    .mockup-sidebar { display: flex; flex-direction: column; gap: 12px; }
+    .mockup-stat-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+    .mockup-stat-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+    .mockup-stat-value { font-family: var(--font-serif); font-size: 1.5rem; letter-spacing: -0.5px; }
+    .mockup-task-list { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; flex: 1; }
+    .mockup-task { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 0.8rem; }
+    .mockup-task:last-child { border: none; padding-bottom: 0; }
+    .mockup-check { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--border-md); flex-shrink: 0; }
+    .mockup-check.done { background: var(--green); border-color: var(--green); }
+    .mockup-task-text { flex: 1; }
+    .mockup-task-text.done { text-decoration: line-through; color: var(--ink-3); }
+
+    /* Social proof bar */
+    .proof-bar { background: var(--surface); border-top: 1px solid var(--border); padding: 24px 0; }
+    .proof-bar-inner { display: flex; align-items: center; justify-content: center; gap: 40px; flex-wrap: wrap; }
+    .proof-item { display: flex; align-items: center; gap: 8px; }
+    .proof-avatar-stack { display: flex; }
+    .proof-avatar { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--surface); margin-left: -8px; background: var(--bg-2); font-family: var(--font-serif); font-size: 0.65rem; display: flex; align-items: center; justify-content: center; color: var(--ink-2); font-weight: 600; }
+    .proof-avatar:first-child { margin-left: 0; }
+    .stars { color: #f59e0b; font-size: 0.9rem; letter-spacing: -1px; }
+
+    /* ── LOGOS MARQUEE ─────────────── */
+    .logos-section { background: var(--bg-2); padding: 32px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); overflow: hidden; }
+    .logos-label { text-align: center; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 20px; }
+    .logos-track { display: flex; gap: 56px; width: max-content; animation: marquee 25s linear infinite; }
+    .logos-track:hover { animation-play-state: paused; }
+    .logo-item { display: flex; align-items: center; gap: 8px; opacity: 0.35; font-weight: 800; font-size: 0.9375rem; white-space: nowrap; transition: opacity 0.2s; }
+    .logo-item:hover { opacity: 0.7; }
+    .logo-item svg { width: 22px; height: 22px; fill: currentColor; }
+    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    /* ── FEATURES GRID ─────────────── */
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .feature-card { padding: 32px; }
+    .feature-icon { width: 44px; height: 44px; border-radius: var(--r-md); background: var(--accent-dim); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+    .feature-icon svg { width: 22px; height: 22px; stroke: var(--accent); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .feature-card h3 { margin-bottom: 10px; }
+    .feature-card p { color: var(--ink-3); font-size: 0.9rem; line-height: 1.65; }
+
+    /* ── HOW IT WORKS ──────────────── */
+    .hiw-section { background: var(--ink); color: var(--bg); }
+    .hiw-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--r-2xl); overflow: hidden; }
+    .hiw-card { background: rgba(255,255,255,0.03); padding: 40px 32px; position: relative; }
+    .hiw-num { font-family: var(--font-serif); font-size: 4rem; letter-spacing: -2px; color: rgba(255,255,255,0.06); position: absolute; top: 20px; right: 24px; line-height: 1; }
+    .hiw-icon { width: 48px; height: 48px; border-radius: var(--r-md); background: rgba(249,115,22,0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+    .hiw-icon svg { width: 24px; height: 24px; stroke: var(--accent); fill: none; stroke-width: 1.8; stroke-linecap: round; }
+    .hiw-card h3 { color: var(--bg); margin-bottom: 10px; }
+    .hiw-card p { color: rgba(255,255,255,0.45); font-size: 0.9rem; line-height: 1.65; }
+
+    /* ── STATS ─────────────────────── */
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--r-2xl); overflow: hidden; }
+    .stat-block { background: var(--surface); padding: 40px 32px; text-align: center; }
+    .stat-block-num { font-family: var(--font-serif); font-size: clamp(2.4rem,4vw,3.5rem); letter-spacing: -2px; color: var(--ink); margin-bottom: 6px; }
+    .stat-block-label { font-size: 0.875rem; color: var(--ink-3); }
+
+    /* ── TESTIMONIALS ──────────────── */
+    .testimonials-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    .testi-card { padding: 28px; }
+    .testi-stars { color: #f59e0b; margin-bottom: 16px; font-size: 0.9rem; letter-spacing: -1px; }
+    .testi-body { font-size: 0.9375rem; line-height: 1.65; color: var(--ink-2); margin-bottom: 20px; font-style: italic; }
+    .testi-author { display: flex; align-items: center; gap: 12px; }
+    .testi-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; font-family: var(--font-serif); font-size: 1rem; color: var(--accent); flex-shrink: 0; }
+    .testi-name { font-size: 0.875rem; font-weight: 700; }
+    .testi-role { font-size: 0.78rem; color: var(--ink-3); }
+
+    /* ── PRICING ───────────────────── */
+    .pricing-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; align-items: start; }
+    .pricing-card { padding: 32px; position: relative; }
+    .pricing-card.popular { border-color: var(--accent); box-shadow: var(--shadow-a), var(--shadow-md); }
+    .popular-tag { position: absolute; top: -1px; left: 50%; transform: translateX(-50%); background: var(--grad-accent); color: #fff; font-size: 0.71875rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; padding: 5px 16px; border-radius: 0 0 var(--r-md) var(--r-md); }
+    .pricing-plan { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+    .pricing-price { font-family: var(--font-serif); font-size: 3rem; letter-spacing: -2px; margin-bottom: 4px; }
+    .pricing-price sup { font-size: 1.2rem; vertical-align: top; margin-top: 0.6rem; display: inline-block; letter-spacing: 0; font-family: var(--font-sans); font-weight: 700; }
+    .pricing-per { font-size: 0.875rem; color: var(--ink-3); margin-bottom: 24px; }
+    .pricing-divider { height: 1px; background: var(--border); margin: 20px 0; }
+    .pricing-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .pf-item { display: flex; align-items: flex-start; gap: 10px; font-size: 0.875rem; color: var(--ink-2); }
+    .pf-check { width: 16px; height: 16px; border-radius: 50%; background: var(--green-dim); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .pf-check svg { width: 9px; height: 9px; stroke: var(--green); stroke-width: 2.5; fill: none; }
+    .pf-x { width: 16px; height: 16px; border-radius: 50%; background: var(--bg-2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .pf-x svg { width: 9px; height: 9px; stroke: var(--ink-4); stroke-width: 2.5; fill: none; }
+
+    /* ── CTA BANNER ────────────────── */
+    .cta-banner {
+      background: var(--ink); border-radius: var(--r-2xl);
+      padding: clamp(48px,6vw,80px) clamp(32px,5vw,64px);
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-banner::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 80% at 50% 120%, rgba(249,115,22,0.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .cta-banner h2 { color: var(--bg); margin-bottom: 16px; position: relative; }
+    .cta-banner h2 em { color: var(--accent); }
+    .cta-banner p { color: rgba(255,255,255,0.45); max-width: 440px; margin: 0 auto 36px; position: relative; }
+    .cta-email-form { display: flex; gap: 10px; max-width: 420px; margin: 0 auto; position: relative; }
+    .cta-email-form input { flex: 1; padding: 13px 18px; border-radius: var(--r-full); border: 1.5px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.07); color: #fff; font-size: 0.9375rem; outline: none; transition: border-color 0.2s, background 0.2s; }
+    .cta-email-form input::placeholder { color: rgba(255,255,255,0.3); }
+    .cta-email-form input:focus { border-color: var(--accent); background: rgba(255,255,255,0.1); }
+    .cta-note { color: rgba(255,255,255,0.25); font-size: 0.8rem; margin-top: 14px; position: relative; }
+
+    /* ── RESPONSIVE ─────────────────── */
+    @media(max-width:900px) {
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .hiw-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 440px; margin: 0 auto; }
+    }
+    @media(max-width:768px) {
+      .hero-cta { flex-direction: column; align-items: center; }
+      .mockup-body { grid-template-columns: 1fr; min-height: auto; }
+      .mockup-sidebar { display: none; }
+      .features-grid { grid-template-columns: 1fr; }
+      .cta-email-form { flex-direction: column; }
+      .cta-email-form input,.cta-email-form .btn { width: 100%; border-radius: var(--r-lg); }
+    }
+    @media(max-width:600px){
+      .proof-bar-inner { flex-direction: column; gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toast">
+  <svg class="toast-icon" viewBox="0 0 20 20" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><polyline points="4 10 8 14 16 6"/></svg>
+  <span class="toast-msg"></span>
+</div>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+  <a href="index.html" class="nav-logo">FocusFlow<span class="nav-logo-dot"></span></a>
+  <nav class="nav-center" aria-label="Main navigation">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+  <div class="nav-right">
+    <a href="auth.html" class="nav-link">Sign in</a>
+    <a href="auth.html#signup" class="btn btn-primary btn-sm">Get started free</a>
+  </div>
+  <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<nav class="nav-drawer" aria-label="Mobile navigation">
+  <a href="#features">Features</a>
+  <a href="#pricing">Pricing</a>
+  <a href="about.html">About</a>
+  <a href="contact.html">Contact</a>
+  <a href="auth.html" class="btn btn-secondary">Sign in</a>
+  <a href="auth.html#signup" class="btn btn-primary">Get started free</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" aria-labelledby="hero-heading">
+  <div class="hero-eyebrow">
+    <span class="badge badge-accent"><span class="badge-dot"></span>Now in public beta</span>
+  </div>
+  <h1 class="t-display" id="hero-heading">The focus tool built for<br><em>serious work.</em></h1>
+  <p class="t-body-lg hero-sub">FocusFlow combines Pomodoro timing, task management, and deep-work analytics into one beautifully minimal interface. No bloat. No noise. Just focus.</p>
+  <div class="hero-cta">
+    <a href="auth.html#signup" class="btn btn-primary btn-lg">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Start for free
+    </a>
+    <a href="#features" class="btn btn-secondary btn-lg">See how it works</a>
+  </div>
+  <p class="hero-note t-sm"><span>✓ Free forever plan</span> &nbsp;·&nbsp; No credit card needed &nbsp;·&nbsp; Set up in 30 seconds</p>
+
+  <div class="hero-preview">
+    <div class="hero-preview-glow"></div>
+    <div class="app-mockup">
+      <div class="mockup-bar">
+        <div class="mockup-dot"></div><div class="mockup-dot"></div><div class="mockup-dot"></div>
+        <div class="mockup-url"></div>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-timer-col">
+          <div class="mockup-ring">
+            <svg width="140" height="140" viewBox="0 0 140 140">
+              <circle cx="70" cy="70" r="58" fill="none" stroke="var(--bg-2)" stroke-width="7"/>
+              <circle cx="70" cy="70" r="58" fill="none" stroke="var(--accent)" stroke-width="7" stroke-linecap="round"
+                stroke-dasharray="364" stroke-dashoffset="100"/>
+            </svg>
+            <div class="mockup-ring-inner">
+              <div class="mockup-time">22:41</div>
+              <div class="mockup-mode">● Focus</div>
+            </div>
+          </div>
+          <div class="mockup-btns">
+            <div class="mockup-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2.2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg></div>
+            <div class="mockup-btn mockup-btn-main"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></div>
+            <div class="mockup-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="2.2" stroke-linecap="round"><polygon points="5 4 15 12 5 20 5 4" fill="var(--ink-3)" stroke="none"/><line x1="19" y1="5" x2="19" y2="19"/></svg></div>
+          </div>
+        </div>
+        <div class="mockup-sidebar">
+          <div class="mockup-stat-card">
+            <div class="mockup-stat-label">Today's focus</div>
+            <div class="mockup-stat-value">3h 12m</div>
+          </div>
+          <div class="mockup-stat-card">
+            <div class="mockup-stat-label">Streak</div>
+            <div class="mockup-stat-value">7 🔥</div>
+          </div>
+          <div class="mockup-task-list">
+            <div class="mockup-task"><div class="mockup-check done"></div><span class="mockup-task-text done">Write research notes</span></div>
+            <div class="mockup-task"><div class="mockup-check done"></div><span class="mockup-task-text done">Review pull requests</span></div>
+            <div class="mockup-task"><div class="mockup-check"></div><span class="mockup-task-text">Draft project proposal</span></div>
+            <div class="mockup-task"><div class="mockup-check"></div><span class="mockup-task-text">Email client update</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF BAR -->
+<div class="proof-bar">
+  <div class="container">
+    <div class="proof-bar-inner">
+      <div class="proof-item">
+        <div class="proof-avatar-stack">
+          <div class="proof-avatar">S</div>
+          <div class="proof-avatar">M</div>
+          <div class="proof-avatar">J</div>
+          <div class="proof-avatar">A</div>
+          <div class="proof-avatar">+</div>
+        </div>
+        <span class="t-sm t-muted" style="margin-left:4px"><strong style="color:var(--ink)">150,000+</strong> focused users</span>
+      </div>
+      <div style="width:1px;height:28px;background:var(--border)"></div>
+      <div class="proof-item">
+        <span class="stars">★★★★★</span>
+        <span class="t-sm t-muted"><strong style="color:var(--ink)">4.9/5</strong> rating</span>
+      </div>
+      <div style="width:1px;height:28px;background:var(--border)"></div>
+      <div class="proof-item">
+        <span class="t-sm t-muted">Loved by students, engineers &amp; founders</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGOS -->
+<div class="logos-section">
+  <div class="logos-label">Trusted by teams at</div>
+  <div style="overflow:hidden">
+    <div class="logos-track" aria-hidden="true">
+      <!-- repeat set twice for seamless loop -->
+      <div class="logo-item"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Notion</div>
+      <div class="logo-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>Linear</div>
+      <div class="logo-item"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Vercel</div>
+      <div class="logo-item"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77"/></svg>GitHub</div>
+      <div class="logo-item"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Figma</div>
+      <div class="logo-item"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Stripe</div>
+      <div class="logo-item"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Notion</div>
+      <div class="logo-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>Linear</div>
+      <div class="logo-item"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Vercel</div>
+      <div class="logo-item"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77"/></svg>GitHub</div>
+      <div class="logo-item"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Figma</div>
+      <div class="logo-item"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Stripe</div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="badge badge-accent">Features</span>
+      <h2 class="t-h2">Everything you need.<br>Nothing you don't.</h2>
+      <p class="t-body">Built around how high-performers actually work — no unnecessary friction between you and your best focus.</p>
+    </div>
+    <div class="features-grid">
+      <div class="card feature-card reveal">
+        <div class="feature-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <h3 class="t-h3">Smart Pomodoro Timer</h3>
+        <p>Adaptive 25/5 cycles that learn from your work patterns. Auto-adjusts break lengths based on session intensity.</p>
+      </div>
+      <div class="card feature-card reveal reveal-d1">
+        <div class="feature-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <h3 class="t-h3">Real-time Analytics</h3>
+        <p>See your focus heatmap, peak hours, streak data, and productivity trends updated live as you work.</p>
+      </div>
+      <div class="card feature-card reveal reveal-d2">
+        <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <h3 class="t-h3">Task Management</h3>
+        <p>Link tasks directly to timer sessions. Watch your to-do list shrink in real time as focus sessions complete.</p>
+      </div>
+      <div class="card feature-card reveal">
+        <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
+        <h3 class="t-h3">Deep Focus Mode</h3>
+        <p>Block distractions and silence the noise. One click locks you into a distraction-free environment until the timer ends.</p>
+      </div>
+      <div class="card feature-card reveal reveal-d1">
+        <div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3 class="t-h3">Team Workspaces</h3>
+        <p>Collaborate with your team. Share focus sessions, compare productivity scores, and stay accountable together.</p>
+      </div>
+      <div class="card feature-card reveal reveal-d2">
+        <div class="feature-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <h3 class="t-h3">End-to-End Encrypted</h3>
+        <p>Your data is yours. All session and task data is encrypted and never shared. Built with privacy from the ground up.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="hiw-section">
+  <div class="container">
+    <div class="section-header reveal" style="color:var(--bg)">
+      <span class="badge" style="background:rgba(249,115,22,0.15);color:var(--accent)">How it works</span>
+      <h2 class="t-h2" style="color:var(--bg)">From zero to focused<br>in under 60 seconds.</h2>
+      <p style="color:rgba(255,255,255,0.4)">No setup. No config. Open the app, set your intention, and start working.</p>
+    </div>
+    <div class="hiw-grid reveal">
+      <div class="hiw-card">
+        <div class="hiw-num">01</div>
+        <div class="hiw-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <h3 class="t-h3">Create your account</h3>
+        <p>Sign up with email or Google in seconds. Your workspace is ready immediately — no onboarding maze.</p>
+      </div>
+      <div class="hiw-card">
+        <div class="hiw-num">02</div>
+        <div class="hiw-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <h3 class="t-h3">Add your tasks</h3>
+        <p>Drop in what you need to get done today. Assign sessions to tasks so every minute has a purpose.</p>
+      </div>
+      <div class="hiw-card">
+        <div class="hiw-num">03</div>
+        <div class="hiw-icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+        <h3 class="t-h3">Press play and ship</h3>
+        <p>Start the timer and work. FocusFlow handles breaks, tracking, and insights — you just focus.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section>
+  <div class="container">
+    <div class="stats-row reveal">
+      <div class="stat-block">
+        <div class="stat-block-num">150k+</div>
+        <div class="stat-block-label">Active users worldwide</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-block-num">98%</div>
+        <div class="stat-block-label">Daily retention rate</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-block-num">4.9★</div>
+        <div class="stat-block-label">Average user rating</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-block-num">2.4M</div>
+        <div class="stat-block-label">Focus sessions completed</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section style="background:var(--bg-2)">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="badge badge-neutral">What users say</span>
+      <h2 class="t-h2">Built for focus.<br>Loved by doers.</h2>
+    </div>
+    <div class="testimonials-grid">
+      <div class="card testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-body">"I've tried Toggl, Forest, Be Focused — nothing stuck. FocusFlow is the first app that disappears when I'm working and shows up perfectly when I need it."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">S</div>
+          <div><div class="testi-name">Sara Kimani</div><div class="testi-role">PhD Candidate, MIT</div></div>
+        </div>
+      </div>
+      <div class="card testi-card reveal reveal-d1">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-body">"The analytics alone are worth it. Seeing my focus heatmap made me realize I was wasting my best hours on Slack. Now I protect those hours fiercely."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:rgba(22,163,74,0.1);color:var(--green)">M</div>
+          <div><div class="testi-name">Marcus Lee</div><div class="testi-role">Senior Engineer, Stripe</div></div>
+        </div>
+      </div>
+      <div class="card testi-card reveal reveal-d2">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-body">"Our whole product team uses FocusFlow's shared workspaces. Sprint productivity went up 34% in the first month. The ROI is embarrassingly obvious."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:rgba(124,58,237,0.1);color:#7c3aed">J</div>
+          <div><div class="testi-name">Jasmine Okafor</div><div class="testi-role">VP Product, Loom</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="badge badge-accent">Pricing</span>
+      <h2 class="t-h2">Simple, transparent pricing.<br>Cancel anytime.</h2>
+      <p>Start free. Upgrade when you're ready.</p>
+    </div>
+    <div class="pricing-grid">
+      <!-- Free -->
+      <div class="card pricing-card reveal">
+        <div class="pricing-plan">Free</div>
+        <div class="pricing-price"><sup>$</sup>0</div>
+        <div class="pricing-per">forever</div>
+        <a href="auth.html#signup" class="btn btn-secondary btn-full">Get started free</a>
+        <div class="pricing-divider"></div>
+        <div class="pricing-features">
+          <div class="pf-item"><div class="pf-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Unlimited Pomodoro sessions</div>
+          <div class="pf-item"><div class="pf-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Up to 10 tasks per day</div>
+          <div class="pf-item"><div class="pf-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>7-day analytics history</div>
+          <div class="pf-item"><div class="pf-x"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Deep Focus Mode</div>
+          <div class="pf-item"><div class="pf-x"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Team workspaces</div>
+        </div>
+      </div>
+      <!-- Pro — popular -->
+      <div class="card pricing-card popular reveal reveal-d1">
+        <div class="popular-tag">Most popular</div>
+        <div class="pricing-plan" style="color:var(--accent)">Pro</div>
+        <div class="pricing-price"><sup>$</sup>9</div>
+        <div class="pricing-per">per month</div>
+        <a href="auth.html#signup" class="btn btn-primary btn-full">Start 14-day free trial</a>
+        <div class="pricing-divider"></div>
+        <div class="pricing-features">
+          <div class="pf-item"><div class="pf-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Everything in Free</div>
+          <div class="pf-item"><div class="pf-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Unlimited tasks</div>
+          <div class="pf-item"><div class="pf-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>90-day analytics history</div>
+          <div class="pf-item"><div class="pf-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Deep Focus Mode</div>
+          <div class="pf-item"><div class="pf-x"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>Team workspaces</div>
+        </div>
+      </div>
+      <!-- Team -->
+      <div class="card pricing-card reveal reveal-d2">
+        <div class="pricing-plan">Team</div>
+        <div class="pricing-price"><sup>$</sup>24</div>
+        <div class="pricing-per">per seat / month</div>
+        <a href="contact.html" class="btn btn-secondary btn-full">Contact sales</a>
+        <div class="pricing-divider"></div>
+        <div class="pricing-features">
+          <div class="pf-item"><div class="pf-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Everything in Pro</div>
+          <div class="pf-item"><div class="pf-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Unlimited team workspaces</div>
+          <div class="pf-item"><div class="pf-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Full analytics history</div>
+          <div class="pf-item"><div class="pf-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Admin dashboard</div>
+          <div class="pf-item"><div class="pf-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>Priority support + SLA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section>
+  <div class="container">
+    <div class="cta-banner reveal">
+      <h2 class="t-h1">Ready to do your best <em>work?</em></h2>
+      <p class="t-body">Join 150,000 people who chose to protect their focus. Start free in 30 seconds.</p>
+      <form class="cta-email-form" onsubmit="handleCTA(event)">
+        <input type="email" placeholder="your@email.com" autocomplete="email" aria-label="Email address" required/>
+        <button type="submit" class="btn btn-primary">Get started free</button>
+      </form>
+      <p class="cta-note">Free plan available · No credit card required · Cancel anytime</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo">FocusFlow<span class="nav-logo-dot"></span></a>
+        <p>Deep work tools for people who take their time seriously.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="dashboard.html">Dashboard</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="#">Blog</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 FocusFlow. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Status</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="utils.js"></script>
+<script>
+function handleCTA(e) {
+  e.preventDefault();
+  const email = e.target.querySelector('input').value.trim();
+  if (!email) return;
+  window.location.href = `auth.html#signup?email=${encodeURIComponent(email)}`;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Contact — FocusFlow</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .page-hero{padding:calc(var(--nav-h)+80px) 0 80px;background:var(--grad-hero);border-bottom:1px solid var(--border)}
+    .page-hero .badge{margin-bottom:24px}
+    .page-hero h1{margin-bottom:16px}
+    .page-hero p{color:var(--ink-3);max-width:480px;line-height:1.75}
+
+    .contact-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:clamp(40px,6vw,80px);align-items:start}
+
+    /* Form card */
+    .contact-form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-2xl);padding:clamp(28px,4vw,44px);box-shadow:var(--shadow-md)}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .form-row{display:flex;flex-direction:column;gap:16px}
+    .select-wrap{position:relative}
+    .select-wrap::after{content:'';position:absolute;right:14px;top:50%;transform:translateY(-50%) rotate(45deg);width:7px;height:7px;border-right:2px solid var(--ink-3);border-bottom:2px solid var(--ink-3);pointer-events:none}
+    .select-wrap select{-webkit-appearance:none;appearance:none;padding-right:40px}
+
+    /* Sidebar info */
+    .contact-info{display:flex;flex-direction:column;gap:24px}
+    .info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:24px}
+    .info-card-icon{width:40px;height:40px;border-radius:var(--r-md);background:var(--accent-dim);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+    .info-card-icon svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round}
+    .info-card h3{font-size:0.9375rem;font-weight:700;margin-bottom:8px}
+    .info-card p{font-size:0.875rem;color:var(--ink-3);line-height:1.65}
+    .info-card a{color:var(--accent);font-weight:700;font-size:0.875rem;display:inline-block;margin-top:8px}
+
+    /* Success state */
+    .form-success{display:none;text-align:center;padding:40px 20px}
+    .success-icon{width:64px;height:64px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+    .success-icon svg{width:28px;height:28px;stroke:var(--green);fill:none;stroke-width:2.2;stroke-linecap:round}
+
+    @media(max-width:900px){
+      .contact-grid{grid-template-columns:1fr}
+      .form-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<div id="toast"><svg class="toast-icon" viewBox="0 0 20 20" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><polyline points="4 10 8 14 16 6"/></svg><span class="toast-msg"></span></div>
+
+<header class="nav" id="nav">
+  <a href="index.html" class="nav-logo">FocusFlow<span class="nav-logo-dot"></span></a>
+  <nav class="nav-center">
+    <a href="index.html#features">Features</a><a href="index.html#pricing">Pricing</a><a href="about.html">About</a><a href="contact.html">Contact</a>
+  </nav>
+  <div class="nav-right">
+    <a href="auth.html" class="nav-link">Sign in</a>
+    <a href="auth.html#signup" class="btn btn-primary btn-sm">Get started free</a>
+  </div>
+  <button class="nav-toggle" aria-label="Open menu"><span></span><span></span><span></span></button>
+</header>
+<nav class="nav-drawer">
+  <a href="index.html#features">Features</a><a href="index.html#pricing">Pricing</a><a href="about.html">About</a><a href="contact.html">Contact</a>
+  <a href="auth.html" class="btn btn-secondary">Sign in</a>
+  <a href="auth.html#signup" class="btn btn-primary">Get started</a>
+</nav>
+
+<!-- HERO -->
+<section class="page-hero">
+  <div class="container">
+    <div class="reveal">
+      <span class="badge badge-neutral">Contact us</span>
+      <h1 class="t-h1">We'd love to hear<br>from you.</h1>
+      <p>Have a question, a feature idea, or want to explore team pricing? We read every message and typically reply within one business day.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT SECTION -->
+<section>
+  <div class="container">
+    <div class="contact-grid">
+
+      <!-- Form -->
+      <div class="contact-form-card reveal">
+        <div id="form-wrap">
+          <h2 class="t-h3" style="margin-bottom:24px">Send us a message</h2>
+          <form id="contact-form" onsubmit="handleContact(event)" novalidate>
+            <div class="form-row">
+              <div class="form-grid">
+                <div class="field" id="f-fname">
+                  <label for="c-fname">First name</label>
+                  <input type="text" id="c-fname" placeholder="Alex" autocomplete="given-name" required/>
+                  <span class="field-error">Required.</span>
+                </div>
+                <div class="field">
+                  <label for="c-lname">Last name</label>
+                  <input type="text" id="c-lname" placeholder="Chen" autocomplete="family-name"/>
+                </div>
+              </div>
+
+              <div class="field" id="f-email">
+                <label for="c-email">Email address</label>
+                <input type="email" id="c-email" placeholder="you@example.com" autocomplete="email" required/>
+                <span class="field-error">Please enter a valid email.</span>
+              </div>
+
+              <div class="field">
+                <label for="c-subject">Subject</label>
+                <div class="select-wrap">
+                  <select id="c-subject">
+                    <option value="">Select a topic…</option>
+                    <option>General question</option>
+                    <option>Feature request</option>
+                    <option>Team / Enterprise pricing</option>
+                    <option>Bug report</option>
+                    <option>Press / Media</option>
+                    <option>Partnership</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field" id="f-msg">
+                <label for="c-msg">Message</label>
+                <textarea id="c-msg" placeholder="Tell us how we can help…" rows="5" required></textarea>
+                <span class="field-error">Please write a message.</span>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg" id="btn-contact" style="border-radius:var(--r-lg);width:100%">
+                Send message →
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Success state -->
+        <div class="form-success" id="form-success">
+          <div class="success-icon">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h3 class="t-h3" style="margin-bottom:10px">Message sent!</h3>
+          <p class="t-body t-muted">Thanks for reaching out. We'll get back to you within one business day.</p>
+          <button onclick="resetForm()" class="btn btn-secondary" style="margin-top:24px;border-radius:var(--r-md)">Send another</button>
+        </div>
+      </div>
+
+      <!-- Info sidebar -->
+      <div class="contact-info reveal reveal-d1">
+        <div class="info-card">
+          <div class="info-card-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <h3>Email us</h3>
+          <p>For general questions, support, and everything else.</p>
+          <a href="mailto:hello@focusflow.app">hello@focusflow.app →</a>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <h3>Live chat</h3>
+          <p>Signed in? Use the chat widget in your dashboard for the fastest response.</p>
+          <a href="auth.html">Go to dashboard →</a>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-icon" style="background:var(--green-dim)">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h3>Team &amp; Enterprise</h3>
+          <p>Want FocusFlow for your whole team? Let's talk pricing, onboarding, and SLAs.</p>
+          <a href="mailto:sales@focusflow.app">sales@focusflow.app →</a>
+        </div>
+
+        <div style="padding:20px;border:1px solid var(--border);border-radius:var(--r-xl);background:var(--bg-2)">
+          <p class="t-sm t-bold" style="margin-bottom:8px">⏱ Response time</p>
+          <p class="t-sm t-muted">We typically respond within <strong style="color:var(--ink)">4–8 hours</strong> on weekdays. Longer on weekends.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><a href="index.html" class="nav-logo" style="color:var(--bg)">FocusFlow<span class="nav-logo-dot"></span></a><p>Deep work tools for people who take their time seriously.</p></div>
+      <div class="footer-col"><h4>Product</h4><a href="index.html#features">Features</a><a href="index.html#pricing">Pricing</a></div>
+      <div class="footer-col"><h4>Company</h4><a href="about.html">About</a><a href="contact.html">Contact</a><a href="#">Blog</a></div>
+      <div class="footer-col"><h4>Legal</h4><a href="#">Privacy</a><a href="#">Terms</a></div>
+    </div>
+    <div class="footer-bottom"><p>© 2026 FocusFlow. All rights reserved.</p><div class="footer-bottom-links"><a href="#">Privacy</a><a href="#">Terms</a></div></div>
+  </div>
+</footer>
+
+<script src="utils.js"></script>
+<script>
+  function validateEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())}
+  function setLoading(btn,on){
+    if(on){btn._l=btn.innerHTML;btn.innerHTML=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 0.75s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Sending…`;btn.disabled=true}
+    else{btn.innerHTML=btn._l;btn.disabled=false}
+  }
+
+  async function handleContact(e) {
+    e.preventDefault();
+    const fname = document.getElementById('c-fname').value.trim();
+    const email = document.getElementById('c-email').value.trim();
+    const msg   = document.getElementById('c-msg').value.trim();
+    const btn   = document.getElementById('btn-contact');
+
+    let valid = true;
+    const ff=document.getElementById('f-fname'),ef=document.getElementById('f-email'),mf=document.getElementById('f-msg');
+    ff.classList.toggle('error',!fname); if(!fname) valid=false;
+    ef.classList.toggle('error',!validateEmail(email)); if(!validateEmail(email)) valid=false;
+    mf.classList.toggle('error',!msg); if(!msg) valid=false;
+    if(!valid) return;
+
+    setLoading(btn, true);
+
+    // ── SUPABASE: Insert contact message ──
+    // const sb = getSupabase();
+    // const { error } = await sb.from('contact_messages').insert({ name: fname, email, message: msg });
+    // if (error) { showToast('Something went wrong. Please try again.', 'error'); setLoading(btn, false); return; }
+
+    await new Promise(r=>setTimeout(r,1400));
+    document.getElementById('form-wrap').style.display='none';
+    document.getElementById('form-success').style.display='block';
+  }
+
+  function resetForm() {
+    document.getElementById('contact-form').reset();
+    document.getElementById('form-wrap').style.display='';
+    document.getElementById('form-success').style.display='none';
+  }
+</script>
+</body>
+</html>
