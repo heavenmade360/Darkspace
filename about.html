@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>About — FocusFlow</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .page-hero{padding:calc(var(--nav-h)+80px) 0 80px;background:var(--grad-hero);border-bottom:1px solid var(--border)}
+    .page-hero-inner{max-width:640px}
+    .page-hero .badge{margin-bottom:24px}
+    .page-hero h1{margin-bottom:20px}
+    .page-hero p{color:var(--ink-3);font-size:clamp(1rem,1.5vw,1.125rem);line-height:1.75}
+
+    .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,6vw,80px);align-items:center}
+    .about-grid.flip{direction:rtl}.about-grid.flip>*{direction:ltr}
+    .about-img{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-2xl);aspect-ratio:4/3;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center}
+    .about-img-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;opacity:0.25}
+    .about-img-placeholder svg{width:64px;height:64px;stroke:var(--ink);fill:none;stroke-width:1}
+    .about-img-placeholder span{font-size:0.875rem;font-weight:600}
+    .about-body h2{margin-bottom:16px}
+    .about-body p{color:var(--ink-3);margin-bottom:16px;line-height:1.75}
+    .about-body p:last-child{margin-bottom:0}
+
+    .values-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .value-card{padding:28px 24px}
+    .value-num{font-family:var(--font-serif);font-size:2.5rem;letter-spacing:-1.5px;color:var(--accent);opacity:0.4;margin-bottom:12px;line-height:1}
+    .value-card h3{margin-bottom:10px}
+    .value-card p{color:var(--ink-3);font-size:0.9rem;line-height:1.65}
+
+    .team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+    .team-card{padding:24px;text-align:center}
+    .team-avatar{width:72px;height:72px;border-radius:50%;background:var(--bg-2);border:1px solid var(--border);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:1.6rem;color:var(--ink-2)}
+    .team-name{font-weight:700;font-size:0.9375rem;margin-bottom:4px}
+    .team-role{font-size:0.8rem;color:var(--ink-3)}
+
+    .mission-block{background:var(--ink);border-radius:var(--r-2xl);padding:clamp(48px,6vw,80px);position:relative;overflow:hidden}
+    .mission-block::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 20% 100%,rgba(249,115,22,0.12) 0%,transparent 60%);pointer-events:none}
+    .mission-block h2{color:var(--bg);margin-bottom:24px;position:relative}
+    .mission-block h2 em{color:var(--accent)}
+    .mission-block p{color:rgba(255,255,255,0.45);line-height:1.8;font-size:1.05rem;position:relative;max-width:600px}
+
+    @media(max-width:900px){
+      .about-grid{grid-template-columns:1fr}
+      .about-grid.flip{direction:ltr}
+      .values-grid{grid-template-columns:1fr 1fr}
+      .team-grid{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:600px){
+      .values-grid,.team-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<div id="toast"><svg class="toast-icon" viewBox="0 0 20 20" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"><polyline points="4 10 8 14 16 6"/></svg><span class="toast-msg"></span></div>
+
+<header class="nav" id="nav">
+  <a href="index.html" class="nav-logo">FocusFlow<span class="nav-logo-dot"></span></a>
+  <nav class="nav-center">
+    <a href="index.html#features">Features</a>
+    <a href="index.html#pricing">Pricing</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+  <div class="nav-right">
+    <a href="auth.html" class="nav-link">Sign in</a>
+    <a href="auth.html#signup" class="btn btn-primary btn-sm">Get started free</a>
+  </div>
+  <button class="nav-toggle" aria-label="Open menu"><span></span><span></span><span></span></button>
+</header>
+<nav class="nav-drawer">
+  <a href="index.html#features">Features</a><a href="index.html#pricing">Pricing</a><a href="about.html">About</a><a href="contact.html">Contact</a>
+  <a href="auth.html" class="btn btn-secondary">Sign in</a>
+  <a href="auth.html#signup" class="btn btn-primary">Get started free</a>
+</nav>
+
+<!-- HERO -->
+<section class="page-hero">
+  <div class="container">
+    <div class="page-hero-inner reveal">
+      <span class="badge badge-neutral">Our story</span>
+      <h1 class="t-h1">We believe focus is a<br><em style="color:var(--accent)">superpower.</em></h1>
+      <p>FocusFlow was built by a small team of engineers and designers who were tired of productivity tools that were more complicated than the work itself. We set out to build something different.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ORIGIN STORY -->
+<section>
+  <div class="container">
+    <div class="about-grid reveal">
+      <div class="about-img">
+        <div class="about-img-placeholder">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Origin story visual</span>
+        </div>
+      </div>
+      <div class="about-body">
+        <span class="badge badge-neutral" style="margin-bottom:20px">How it started</span>
+        <h2 class="t-h2">A timer app born out of frustration.</h2>
+        <p>In 2022, our founder Marcus was finishing his master's thesis and bouncing between five different apps — a timer here, a task list there, a habit tracker on his phone. None of them talked to each other. None of them understood how he actually worked.</p>
+        <p>He spent a weekend building a simple timer that tracked what he was working on. He shared it with friends. By Monday morning, 200 people were using it.</p>
+        <p>That weekend project became FocusFlow. Today, 150,000 people use it every day to do their best work.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MISSION -->
+<section>
+  <div class="container">
+    <div class="mission-block reveal">
+      <h2 class="t-h1">Our mission is simple: <em>make focused work the default.</em></h2>
+      <p>Every feature we build, every design decision we make, every line of code we ship is evaluated against one question — does this help people do deeper, better work? If the answer isn't a clear yes, we don't ship it.</p>
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section style="background:var(--bg-2)">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="badge badge-neutral">Our values</span>
+      <h2 class="t-h2">What we stand for.</h2>
+    </div>
+    <div class="values-grid">
+      <div class="card value-card reveal">
+        <div class="value-num">01</div>
+        <h3 class="t-h3">Simplicity over complexity</h3>
+        <p>Every feature added is a feature that can distract. We ruthlessly cut anything that doesn't earn its place in your workflow.</p>
+      </div>
+      <div class="card value-card reveal reveal-d1">
+        <div class="value-num">02</div>
+        <h3 class="t-h3">Privacy by design</h3>
+        <p>Your work habits are deeply personal. We collect only what we need and never sell your data — full stop.</p>
+      </div>
+      <div class="card value-card reveal reveal-d2">
+        <div class="value-num">03</div>
+        <h3 class="t-h3">Speed and reliability</h3>
+        <p>A timer that lags is useless. We obsess over performance so FocusFlow is always instant and always there when you need it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section>
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="badge badge-neutral">The team</span>
+      <h2 class="t-h2">Small team. Big focus.</h2>
+      <p>We're a team of 8 people working remotely across 4 countries. We use FocusFlow every day to ship FocusFlow.</p>
+    </div>
+    <div class="team-grid">
+      <div class="card team-card reveal">
+        <div class="team-avatar">M</div>
+        <div class="team-name">Marcus Adeyemi</div>
+        <div class="team-role">Founder & CEO</div>
+      </div>
+      <div class="card team-card reveal reveal-d1">
+        <div class="team-avatar" style="background:rgba(249,115,22,0.1);color:var(--accent)">S</div>
+        <div class="team-name">Sara Kim</div>
+        <div class="team-role">Head of Design</div>
+      </div>
+      <div class="card team-card reveal reveal-d2">
+        <div class="team-avatar" style="background:rgba(22,163,74,0.1);color:var(--green)">J</div>
+        <div class="team-name">James Okonkwo</div>
+        <div class="team-role">Lead Engineer</div>
+      </div>
+      <div class="card team-card reveal reveal-d3">
+        <div class="team-avatar" style="background:rgba(124,58,237,0.1);color:#7c3aed">A</div>
+        <div class="team-name">Anika Patel</div>
+        <div class="team-role">Head of Growth</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="background:var(--bg-2)">
+  <div class="container" style="text-align:center">
+    <div class="reveal">
+      <span class="badge badge-accent" style="margin-bottom:24px">Join us</span>
+      <h2 class="t-h2" style="margin-bottom:16px">Ready to focus on what matters?</h2>
+      <p class="t-body t-muted" style="max-width:400px;margin:0 auto 36px">Start free. No credit card. No fluff. Just better focus, starting today.</p>
+      <a href="auth.html#signup" class="btn btn-primary btn-lg">Start for free →</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><a href="index.html" class="nav-logo" style="color:var(--bg)">FocusFlow<span class="nav-logo-dot"></span></a><p>Deep work tools for people who take their time seriously.</p></div>
+      <div class="footer-col"><h4>Product</h4><a href="index.html#features">Features</a><a href="index.html#pricing">Pricing</a></div>
+      <div class="footer-col"><h4>Company</h4><a href="about.html">About</a><a href="contact.html">Contact</a><a href="#">Blog</a></div>
+      <div class="footer-col"><h4>Legal</h4><a href="#">Privacy</a><a href="#">Terms</a></div>
+    </div>
+    <div class="footer-bottom"><p>© 2026 FocusFlow. All rights reserved.</p><div class="footer-bottom-links"><a href="#">Privacy</a><a href="#">Terms</a></div></div>
+  </div>
+</footer>
+
+<script src="utils.js"></script>
+</body>
+</html>
